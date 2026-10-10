@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <AssemblyName>ClipVoice</AssemblyName>
+    <RootNamespace>ClipVoice</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\ClipVoice.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <InformationalVersion>1.0.0</InformationalVersion>
+    <Product>ClipVoice</Product>
+    <Title>ClipVoice</Title>
+    <Description>Clipboard, templates, translation and text-to-speech for Windows.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Assets\ClipVoice.ico" />
+    <None Remove="Assets\ClipVoice.png" />
+    <Resource Include="Assets\ClipVoice.ico" />
+    <Resource Include="Assets\ClipVoice.png" />
+  </ItemGroup>
+</Project>

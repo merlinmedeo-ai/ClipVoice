@@ -1,0 +1,46 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ist/
+[Aa]rtifacts/
+[Pp]ublish/
+
+# Local SDK and IDE state
+.dotnet/
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test and coverage output
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Packages, temporary files and logs
+packages/
+*.nupkg
+*.snupkg
+*.tmp
+*.temp
+*.log
+*.bak
+*.pdb
+
+# Windows and macOS metadata
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Local signing material and environment files
+*.pfx
+*.p12
+*.cer
+*.key
+.env
+.env.*
+!.env.example

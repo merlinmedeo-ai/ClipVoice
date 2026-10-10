@@ -1,0 +1,367 @@
+<Window x:Class="ClipVoice.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Настройки ClipVoice" Width="1120" Height="880" MinWidth="900" MinHeight="620"
+        WindowStartupLocation="CenterOwner" Background="{StaticResource Bg}" Foreground="{StaticResource Text}">
+    <Window.Resources>
+        <Style x:Key="ManagerListItemStyle" TargetType="ListBoxItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,1"/>
+            <Setter Property="Background" Value="#141821"/>
+            <Setter Property="BorderBrush" Value="#252B38"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="ItemRoot" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="9" Padding="10,3">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ItemRoot" Property="Background" Value="#1C2230"/>
+                                <Setter TargetName="ItemRoot" Property="BorderBrush" Value="#3A4356"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemRoot" Property="Background" Value="#2A2750"/>
+                                <Setter TargetName="ItemRoot" Property="BorderBrush" Value="#7868FF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="20">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <StackPanel Margin="4,0,0,15">
+            <TextBlock x:Name="SettingsTitleText" Text="Настройки ClipVoice" FontSize="24" FontWeight="SemiBold"/>
+            <TextBlock Text="Все основные действия можно настроить здесь. API-ключи и регистрации не нужны." Style="{StaticResource Hint}" Margin="0,3,0,0"/>
+        </StackPanel>
+
+        <TabControl x:Name="SettingsTabs" Grid.Row="1">
+            <TabItem Header="ОСНОВНОЕ">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
+                    <StackPanel>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Озвучивание выделенного текста" Style="{StaticResource SectionTitle}"/>
+                                <TextBlock Text="Выдели текст, вызови контекстное меню шаблонов и выбери «Озвучить выделенный текст»." Style="{StaticResource Hint}"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Как открывать панель" Style="{StaticResource SectionTitle}"/>
+                                <TextBlock Text="Если боковая полоска мешает, выбери первый вариант — справа на экране ничего не останется, а ClipVoice будет открываться только глобальной горячей клавишей." Style="{StaticResource Hint}"/>
+                                <ComboBox x:Name="PanelOpenMode" Margin="0,12,0,8" MinHeight="38">
+                                    <ComboBoxItem Content="Только горячей клавишей — без полоски справа" Tag="hotkey"/>
+                                    <ComboBoxItem Content="Горячей клавишей + боковая полоска справа" Tag="edge"/>
+                                </ComboBox>
+                                <TextBlock Text="Горячую клавишу открытия панели можно изменить во вкладке «ГОРЯЧИЕ КЛАВИШИ»." Style="{StaticResource Hint}" Margin="0,0,0,8"/>
+                                <CheckBox x:Name="HideAfterPasteCheck" Content="Скрывать ClipVoice после вставки"/>
+                                <CheckBox x:Name="AutoHidePanelCheck" Content="Автоматически скрывать панель при клике вне неё"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Запуск и хранение" Style="{StaticResource SectionTitle}"/>
+                                <CheckBox x:Name="AutoStartCheck" Content="Запускать вместе с Windows"/>
+                                <TextBlock Text="История ограничена 25 элементами. История и шаблоны шифруются Windows DPAPI и доступны только текущему пользователю Windows. Настройки горячих клавиш не содержат секретов и хранятся отдельно." Style="{StaticResource Hint}" Margin="0,7,0,0"/>
+                                <TextBlock Text="Аудиокэш ограничен 500 МБ; файлы старше 30 дней удаляются автоматически." Style="{StaticResource Hint}" Margin="0,9,0,5"/>
+                                <Button Content="Открыть папку аудиокэша" HorizontalAlignment="Left" Click="OpenAudioCache_Click"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="ГОРЯЧИЕ КЛАВИШИ">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
+                    <StackPanel>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Как назначить" Style="{StaticResource SectionTitle}"/>
+                                <TextBlock Text="Кликни в поле и нажми нужное сочетание. Печатать его вручную не нужно. Backspace/Delete очищает поле. Для системной горячей клавиши нужен хотя бы Ctrl, Alt, Shift или Win." Style="{StaticResource Hint}"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Card}">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="265"/></Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" Margin="0,4,18,12"><TextBlock Text="Открыть / скрыть панель" FontWeight="SemiBold"/><TextBlock Text="Показывает историю и шаблоны поверх текущего окна." Style="{StaticResource Hint}"/></StackPanel>
+                                <TextBox x:Name="PanelHotkey" Background="{StaticResource AccentSoft}" BorderBrush="{StaticResource Accent}" FontWeight="SemiBold" FontSize="15" TextAlignment="Center" ToolTip="Кликни сюда и нажми новое сочетание клавиш" Grid.Row="0" Grid.Column="1" IsReadOnly="True" PreviewKeyDown="HotkeyBox_PreviewKeyDown" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Row="1" Margin="0,4,18,12"><TextBlock Text="Озвучить" FontWeight="SemiBold"/><TextBlock Text="При включённом автозахвате достаточно выделить текст." Style="{StaticResource Hint}"/></StackPanel>
+                                <TextBox x:Name="SpeakHotkey" Background="{StaticResource AccentSoft}" BorderBrush="{StaticResource Accent}" FontWeight="SemiBold" FontSize="15" TextAlignment="Center" ToolTip="Кликни сюда и нажми новое сочетание клавиш" Grid.Row="1" Grid.Column="1" IsReadOnly="True" PreviewKeyDown="HotkeyBox_PreviewKeyDown" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Row="2" Margin="0,4,18,12"><TextBlock Text="Перевести автоматически" FontWeight="SemiBold"/><TextBlock Text="Язык определяется по самому тексту, а не по раскладке клавиатуры." Style="{StaticResource Hint}"/></StackPanel>
+                                <TextBox x:Name="TranslateHotkey" Background="{StaticResource AccentSoft}" BorderBrush="{StaticResource Accent}" FontWeight="SemiBold" FontSize="15" TextAlignment="Center" ToolTip="Кликни сюда и нажми новое сочетание клавиш" Grid.Row="2" Grid.Column="1" IsReadOnly="True" PreviewKeyDown="HotkeyBox_PreviewKeyDown" VerticalAlignment="Center"/>
+                                <StackPanel Grid.Row="3" Margin="0,4,18,2"><TextBlock Text="Перевести и озвучить" FontWeight="SemiBold"/><TextBlock Text="Перевод помещается в буфер и сразу озвучивается." Style="{StaticResource Hint}"/></StackPanel>
+                                <TextBox x:Name="TranslateSpeakHotkey" Background="{StaticResource AccentSoft}" BorderBrush="{StaticResource Accent}" FontWeight="SemiBold" FontSize="15" TextAlignment="Center" ToolTip="Кликни сюда и нажми новое сочетание клавиш" Grid.Row="3" Grid.Column="1" IsReadOnly="True" PreviewKeyDown="HotkeyBox_PreviewKeyDown" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <TextBlock x:Name="HotkeyIssueText" Foreground="#FF8E9B" TextWrapping="Wrap" Margin="6,0,6,8"/>
+                        <Button Content="Вернуть стандартные сочетания" HorizontalAlignment="Left" Click="ResetHotkeys_Click"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="ОЗВУЧКА И ПЕРЕВОД">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
+                    <StackPanel>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Состояние озвучки" Style="{StaticResource SectionTitle}"/>
+                                        <TextBlock Text="ClipVoice автоматически переключается между двумя онлайн-движками и локальным Piper. ✓ означает реальную успешную озвучку; ◐ означает, что Piper установлен, но реальный офлайн-синтез ещё не проверен." Style="{StaticResource Hint}"/>
+                                    </StackPanel>
+                                    <Border Grid.Column="1" Background="{StaticResource AccentSoft}" CornerRadius="9" Padding="10,6" Margin="12,0,0,0" VerticalAlignment="Top">
+                                        <TextBlock x:Name="ActiveTtsText" Text="Последний: —" Foreground="#DDD9FF" FontWeight="SemiBold"/>
+                                    </Border>
+                                </Grid>
+                                <Grid Margin="0,3,0,7">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="160"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                    <TextBlock Text="●  Edge онлайн" FontWeight="SemiBold" Margin="0,5"/><TextBlock x:Name="EdgeTtsHealthText" Grid.Column="1" Margin="8,5" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+                                    <TextBlock Grid.Row="1" Text="●  Google резерв" FontWeight="SemiBold" Margin="0,5"/><TextBlock x:Name="GoogleTtsHealthText" Grid.Row="1" Grid.Column="1" Margin="8,5" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+                                    <TextBlock Grid.Row="2" Text="●  Piper локально" FontWeight="SemiBold" Margin="0,5"/><TextBlock x:Name="PiperTtsHealthText" Grid.Row="2" Grid.Column="1" Margin="8,5" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+                                </Grid>
+                                <Border Background="#11151D" CornerRadius="9" Padding="10" Margin="0,5,0,8">
+                                    <TextBlock x:Name="TtsMemoryText" Text="Память: проверяю…" Foreground="{StaticResource Muted}"/>
+                                </Border>
+                                <CheckBox x:Name="AutoPrepareLocalTtsCheck" Content="Подготавливать локальный голос после первого использования языка (не при запуске)" Margin="0,4,0,5"/>
+                                <TextBlock Text="После загрузки локальный Piper не требует Интернета. Модели лежат на диске и загружаются в RAM только на время озвучки; после неё процесс Piper закрывается." Style="{StaticResource Hint}" Margin="0,0,0,8"/>
+                                <WrapPanel>
+                                    <Button Content="Проверить все, включая офлайн" Click="CheckTts_Click"/>
+                                    <Button Content="Сравнить скорость движков" Click="MeasureTtsSpeed_Click"/>
+                                    <Button x:Name="PrepareLocalTtsButton" Content="Подготовить локальный резерв" Background="{StaticResource AccentSoft}" Click="PrepareLocalTts_Click"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Онлайн-озвучка" Style="{StaticResource SectionTitle}"/>
+                                <TextBlock Text="Основная озвучка — Edge Read Aloud через интернет без аккаунта и API-ключа. Если Edge временно не отвечает, ClipVoice автоматически пробует резервную Google Translate TTS. Русский, украинский и английский голоса Edge можно выбрать вручную; для других языков язык и голос выбираются автоматически." Style="{StaticResource Hint}"/>
+                                <Grid Margin="0,14,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="140"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                    <TextBlock Text="Русский" VerticalAlignment="Center"/><ComboBox x:Name="RussianVoice" Grid.Column="1" Margin="8,4">
+                                        <ComboBoxItem Content="ru-RU-SvetlanaNeural"/><ComboBoxItem Content="ru-RU-DmitryNeural"/>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="1" Text="Английский" VerticalAlignment="Center"/><ComboBox x:Name="EnglishVoice" Grid.Row="1" Grid.Column="1" Margin="8,4">
+                                        <ComboBoxItem Content="en-US-EmmaMultilingualNeural"/><ComboBoxItem Content="en-US-AndrewMultilingualNeural"/><ComboBoxItem Content="en-US-AriaNeural"/>
+                                    </ComboBox>
+                                    <TextBlock Grid.Row="2" Text="Украинский" VerticalAlignment="Center"/><ComboBox x:Name="UkrainianVoice" Grid.Row="2" Grid.Column="1" Margin="8,4">
+                                        <ComboBoxItem Content="uk-UA-PolinaNeural"/><ComboBoxItem Content="uk-UA-OstapNeural"/>
+                                    </ComboBox>
+                                </Grid>
+                                <TextBlock Text="Скорость голоса" Margin="0,13,0,4"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Slider x:Name="SpeechRate" Minimum="-50" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True" Width="500"/>
+                                    <TextBlock Text="{Binding ElementName=SpeechRate, Path=Value, StringFormat={}{0:0}%}" Margin="14,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock Text="Скорость задаётся при создании аудио для выбранного движка; плеер воспроизводит файл на обычной скорости." Style="{StaticResource Hint}" Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Автоматический перевод" Style="{StaticResource SectionTitle}"/>
+                                <TextBlock Text="ClipVoice определяет язык самого текста. Русский или украинский → английский. Английский, французский, немецкий и другие иностранные языки → выбранный ниже русский или украинский. Раскладка клавиатуры больше не влияет на направление перевода." Style="{StaticResource Hint}"/>
+                                <Grid Margin="0,14,0,4">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="260"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="Иностранный текст переводить на" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Используется для английского, французского и других языков." Style="{StaticResource Hint}" Margin="0,3,12,0"/>
+                                    </StackPanel>
+                                    <ComboBox x:Name="PreferredTranslationLanguage" Grid.Column="1" MinWidth="210" VerticalAlignment="Center">
+                                        <ComboBoxItem Content="Русский" Tag="ru"/>
+                                        <ComboBoxItem Content="Украинский" Tag="uk"/>
+                                    </ComboBox>
+                                </Grid>
+                                <Border Background="#171B24" CornerRadius="10" Padding="12" Margin="0,10,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="Пример" FontWeight="SemiBold"/>
+                                        <TextBlock Text="English / Français / Deutsch → выбранный русский или украинский&#x0a;Русский / Українська → English" Style="{StaticResource Hint}" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                                <TextBlock Text="После перевода результат автоматически становится текущим буфером и готов для Ctrl+V. Команда «Перевести и озвучить» дополнительно читает уже переведённый текст." Style="{StaticResource Hint}" Margin="0,10,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="#171D1B" BorderBrush="#2F5A49" BorderThickness="1" CornerRadius="12" Padding="14">
+                            <TextBlock Text="Надёжность: Edge и Google могут менять свои неофициальные веб-интерфейсы, поэтому они идут первыми только ради качества. Piper — третий, полностью локальный резерв. После его однократной подготовки RU / UK / EN продолжают озвучиваться даже при отсутствии Интернета или поломке обоих онлайн-сервисов." Foreground="#C9E6D8" TextWrapping="Wrap"/>
+                        </Border>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Диагностика озвучки" Style="{StaticResource SectionTitle}"/>
+                                <TextBlock Text="В обычной работе ClipVoice не записывает подробные события. В журнал попадают только ошибки, отказы движков и другие сбои; текст озвучки не сохраняется." Style="{StaticResource Hint}" Margin="0,0,0,9"/>
+                                <Button Content="Скопировать журнал ошибок" HorizontalAlignment="Left" Click="CopyDiagnostics_Click"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="ШАБЛОНЫ">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="{StaticResource Panel}" BorderBrush="#262B37" BorderThickness="1" CornerRadius="11" Padding="13" Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="300"/></Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,18,0" VerticalAlignment="Center">
+                                <TextBlock Text="Меню шаблонов" FontSize="15" FontWeight="SemiBold"/>
+                                <CheckBox x:Name="TemplateMouseGestureCheck" Content="Открывать сочетанием с правой кнопкой мыши" Margin="0,4,0,0"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Комбинация" Foreground="{StaticResource Muted}" FontSize="11" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="TemplateMouseModifierCombo" MinHeight="36">
+                                    <ComboBoxItem Content="Alt + ПКМ" Tag="Alt"/>
+                                    <ComboBoxItem Content="Ctrl + ПКМ" Tag="Ctrl"/>
+                                    <ComboBoxItem Content="Shift + ПКМ" Tag="Shift"/>
+                                    <ComboBoxItem Content="Ctrl + Shift + ПКМ" Tag="Ctrl+Shift"/>
+                                    <ComboBoxItem Content="Ctrl + Alt + ПКМ" Tag="Ctrl+Alt"/>
+                                    <ComboBoxItem Content="Alt + Shift + ПКМ" Tag="Alt+Shift"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1" Background="#121620" BorderBrush="#252B38" BorderThickness="1" CornerRadius="10" Padding="10,7" Margin="0,0,0,8">
+                        <TextBlock Foreground="{StaticResource Muted}" TextWrapping="Wrap">
+                            <Run Text="⋮⋮  Зажми и перетащи" FontWeight="SemiBold" Foreground="#CFC9FF"/>
+                            <Run Text=" папку или шаблон, чтобы изменить порядок. Шаблон можно перетащить на другую папку слева. Порядок сохраняется и используется в контекстном меню."/>
+                        </TextBlock>
+                    </Border>
+
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="330"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Background="{StaticResource Panel}" BorderBrush="#262B37" BorderThickness="1" CornerRadius="12" Padding="12" Margin="0">
+                            <Grid>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Папки" FontSize="17" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Перетаскивай, чтобы менять порядок" Style="{StaticResource Hint}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <Border Grid.Column="1" Background="#242A36" CornerRadius="8" Padding="8,4" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding ElementName=FolderList, Path=Items.Count, StringFormat={}{0} папок}" Foreground="{StaticResource Muted}" FontSize="10"/>
+                                    </Border>
+                                </Grid>
+
+                                <ListBox x:Name="FolderList" Grid.Row="1" Margin="0,9,0,8" MinHeight="160"
+                                         SelectionChanged="FolderList_SelectionChanged"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         AllowDrop="True"
+                                         PreviewMouseLeftButtonDown="FolderList_PreviewMouseLeftButtonDown"
+                                         PreviewMouseMove="FolderList_PreviewMouseMove"
+                                         DragOver="FolderList_DragOver"
+                                         Drop="FolderList_Drop">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource ManagerListItemStyle}">
+                                            <Setter Property="MinHeight" Value="34"/>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="24"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                <TextBlock Text="⋮⋮" Foreground="#737D92" FontSize="15" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Зажми и перетащи"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                                <Border Grid.Column="2" Background="#242A36" CornerRadius="7" Padding="7,3" Margin="8,0,0,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Templates.Count}" Foreground="#AFB8CA" FontSize="10"/>
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
+                                <Grid Grid.Row="2">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <Button Content="+ Папка" Background="{StaticResource Accent}" Margin="0,3,4,0" Click="AddFolder_Click"/>
+                                    <Button Grid.Column="1" Content="Переименовать" Margin="4,3,4,0" Click="RenameFolder_Click"/>
+                                    <Button Grid.Column="2" Content="Удалить" Margin="4,3,0,0" Click="DeleteFolder_Click"/>
+                                </Grid>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="2" Background="{StaticResource Panel}" BorderBrush="#262B37" BorderThickness="1" CornerRadius="12" Padding="12" Margin="0">
+                            <Grid>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Шаблоны" FontSize="17" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Выбери шаблон для изменения или удаления • двойной клик — изменить" Style="{StaticResource Hint}" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Border Background="#242A36" CornerRadius="8" Padding="8,4" VerticalAlignment="Center" Margin="0,0,6,0">
+                                            <TextBlock Text="{Binding ElementName=TemplateList, Path=Items.Count, StringFormat={}{0} шаблонов}" Foreground="{StaticResource Muted}" FontSize="10"/>
+                                        </Border>
+                                        <Button Content="Импорт TXT" Padding="9,5" Click="ImportTemplates_Click" ToolTip="Добавить шаблоны из TXT-файла"/>
+                                        <Button Content="Экспорт TXT" Padding="9,5" Margin="5,0,0,0" Click="ExportTemplates_Click" ToolTip="Сохранить все шаблоны в TXT-файл"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <ListBox x:Name="TemplateList" Grid.Row="1" Margin="0,9,0,8" MinHeight="160"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         AllowDrop="True"
+                                         MouseDoubleClick="TemplateList_MouseDoubleClick"
+                                         PreviewMouseLeftButtonDown="TemplateList_PreviewMouseLeftButtonDown"
+                                         PreviewMouseMove="TemplateList_PreviewMouseMove"
+                                         DragOver="TemplateList_DragOver"
+                                         Drop="TemplateList_Drop">
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource ManagerListItemStyle}">
+                                            <Setter Property="MinHeight" Value="37"/>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="24"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                <TextBlock Text="⋮⋮" Foreground="#737D92" FontSize="15" VerticalAlignment="Center" Cursor="SizeAll" ToolTip="Зажми и перетащи"/>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding PreviewContent}" Foreground="{StaticResource Muted}" FontSize="10" TextTrimming="CharacterEllipsis" MaxHeight="16"/>
+                                                </StackPanel>
+                                                <Border Grid.Column="2" Background="#352F63" CornerRadius="7" Padding="7,3" Margin="10,0,0,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding HotkeyBadge}" Foreground="#D7D2FF" FontSize="9"/>
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+
+                                <Grid Grid.Row="2">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <Button Content="+ Новый шаблон" Background="{StaticResource Accent}" Margin="0,3,4,0" Click="AddTemplate_Click"/>
+                                    <Button Grid.Column="1" Content="Изменить" Margin="4,3,4,0" Click="EditTemplate_Click"/>
+                                    <Button Grid.Column="2" Content="Удалить" Margin="4,3,0,0" Click="DeleteTemplate_Click"/>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <Grid Grid.Row="2" Margin="0,14,0,0">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <TextBlock x:Name="SaveStatusText" Foreground="#FF8E9B" TextWrapping="Wrap" VerticalAlignment="Center" Margin="5,0,12,0"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal"><Button Content="Отмена" Click="Cancel_Click"/><Button Content="Сохранить изменения" Background="{StaticResource Accent}" Click="Save_Click"/></StackPanel>
+        </Grid>
+    </Grid>
+</Window>

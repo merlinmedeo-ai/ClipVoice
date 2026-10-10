@@ -1,0 +1,44 @@
+name: Сообщение об ошибке
+description: Сообщить о воспроизводимой проблеме в ClipVoice
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Не прикладывайте содержимое буфера обмена, приватные шаблоны, токены или другие чувствительные данные.
+  - type: textarea
+    id: description
+    attributes:
+      label: Описание
+      description: Что произошло и чего вы ожидали?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как воспроизвести
+      placeholder: |
+        1. Запустить...
+        2. Нажать...
+        3. Увидеть...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Версия ClipVoice
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Версия Windows
+      placeholder: Windows 11 24H2
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Дополнительный контекст
+      description: Допустимы обезличенные фрагменты журнала без пользовательского текста и секретов.
