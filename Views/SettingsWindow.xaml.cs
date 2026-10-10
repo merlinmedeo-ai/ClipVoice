@@ -31,6 +31,7 @@ public partial class SettingsWindow : Window
         SettingsTitleText.Text = $"ClipVoice Settings {AppInfo.DisplayVersion}";
         SourceInitialized += (_, _) => FitToMonitorWorkArea();
         var s = AppInstance.Controller.Settings;
+        SelectComboByTag(InterfaceLanguageCombo, LocalizationService.NormalizeLanguage(s.Language));
         PanelHotkey.Text = s.HotkeyPanel;
         SpeakHotkey.Text = s.HotkeySpeak;
         TranslateHotkey.Text = s.HotkeyTranslate;
@@ -64,6 +65,9 @@ public partial class SettingsWindow : Window
                 AddTemplate_Click(this, new RoutedEventArgs());
             }));
         }
+        LocalizationService.Apply(this, s.Language);
+        Title = $"{LocalizationService.Translate("ClipVoice Settings", s.Language)} {AppInfo.DisplayVersion}";
+        SettingsTitleText.Text = Title;
     }
 
     private static TemplateFolder CloneFolder(TemplateFolder source) => new()
@@ -101,6 +105,7 @@ public partial class SettingsWindow : Window
 
     private AppSettings BuildSettings() => new()
     {
+        Language = ComboTagValue(InterfaceLanguageCombo, "en"),
         HotkeyPanel = PanelHotkey.Text.Trim(),
         HotkeySpeak = SpeakHotkey.Text.Trim(),
         HotkeyTranslate = TranslateHotkey.Text.Trim(),
@@ -634,6 +639,10 @@ public partial class SettingsWindow : Window
             SettingsTabs.SelectedIndex = registration.Any(x => x.StartsWith("Template", StringComparison.OrdinalIgnoreCase)) ? 3 : 1;
             return;
         }
+        AppInstance.ApplyLocalization();
+        LocalizationService.Apply(this, settings.Language);
+        Title = $"{LocalizationService.Translate("ClipVoice Settings", settings.Language)} {AppInfo.DisplayVersion}";
+        SettingsTitleText.Text = Title;
         DialogResult = true;
     }
 

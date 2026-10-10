@@ -26,6 +26,7 @@ public partial class TemplateEditorWindow : Window
             HotkeyBox.Text = source.Hotkey;
         }
         Loaded += (_, _) => NameBox.Focus();
+        LocalizationService.Apply(this, settings.Language);
     }
 
     private void HotkeyBox_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -44,8 +45,9 @@ public partial class TemplateEditorWindow : Window
     private void Save_Click(object sender, RoutedEventArgs e)
     {
         ErrorText.Text = "";
-        if (string.IsNullOrWhiteSpace(NameBox.Text)) { ErrorText.Text = "Enter a template name."; return; }
-        if (string.IsNullOrWhiteSpace(ContentBox.Text)) { ErrorText.Text = "Template text cannot be empty."; return; }
+        var language = ((App)Application.Current).Controller.Settings.Language;
+        if (string.IsNullOrWhiteSpace(NameBox.Text)) { ErrorText.Text = LocalizationService.Translate("Enter a template name.", language); return; }
+        if (string.IsNullOrWhiteSpace(ContentBox.Text)) { ErrorText.Text = LocalizationService.Translate("Template text cannot be empty.", language); return; }
         if (!string.IsNullOrWhiteSpace(HotkeyBox.Text))
         {
             if (!HotkeyParser.TryParse(HotkeyBox.Text, out _, out _, out var normalized, out var error))

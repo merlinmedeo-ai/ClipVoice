@@ -46,6 +46,16 @@
                     <StackPanel>
                         <Border Style="{StaticResource Card}">
                             <StackPanel>
+                                <TextBlock Text="Interface language" Style="{StaticResource SectionTitle}"/>
+                                <ComboBox x:Name="InterfaceLanguageCombo" Margin="0,8,0,0" MinHeight="38">
+                                    <ComboBoxItem Content="English" Tag="en"/>
+                                    <ComboBoxItem Content="Українська" Tag="uk"/>
+                                    <ComboBoxItem Content="Русский" Tag="ru"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
                                 <TextBlock Text="Read selected text aloud" Style="{StaticResource SectionTitle}"/>
                                 <TextBlock Text="Select text, open the template context menu, and choose “Read selected text aloud”." Style="{StaticResource Hint}"/>
                             </StackPanel>

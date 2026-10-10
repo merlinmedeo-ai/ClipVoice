@@ -36,6 +36,7 @@ public partial class TemplatePopupWindow : Window
         Func<InputTarget, Task> translateSpeakSelectionAsync)
     {
         InitializeComponent();
+        LocalizationService.Apply(this, ((App)Application.Current).Controller.Settings.Language);
         _folders = folders.Where(f => f.Templates.Count > 0).ToList();
         _target = target;
         _screenX = screenX;

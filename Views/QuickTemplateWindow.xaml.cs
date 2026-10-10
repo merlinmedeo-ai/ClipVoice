@@ -6,6 +6,7 @@ using System.Windows.Interop;
 using System.Windows.Threading;
 using ClipVoice.Models;
 using ClipVoice.Native;
+using ClipVoice.Services;
 
 namespace ClipVoice.Views;
 
@@ -37,8 +38,10 @@ public partial class QuickTemplateWindow : Window
 
         foreach (var folder in _folders)
             FolderList.Items.Add(new FolderChoice { Id = folder.Id, Name = folder.Name });
-        FolderList.Items.Add(new FolderChoice { Name = "+ Create a new folder…", IsNew = true });
+        var language = ((App)Application.Current).Controller.Settings.Language;
+        FolderList.Items.Add(new FolderChoice { Name = LocalizationService.Translate("+ Create a new folder…", language), IsNew = true });
         FolderList.SelectedIndex = _folders.Count > 0 ? 0 : FolderList.Items.Count - 1;
+        LocalizationService.Apply(this, ((App)Application.Current).Controller.Settings.Language);
 
         Loaded += (_, _) =>
         {
@@ -123,14 +126,14 @@ public partial class QuickTemplateWindow : Window
         var name = NameBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(name))
         {
-            ErrorText.Text = "Enter a template name.";
+            ErrorText.Text = LocalizationService.Translate("Enter a template name.", ((App)Application.Current).Controller.Settings.Language);
             NameBox.Focus();
             return;
         }
 
         if (FolderList.SelectedItem is not FolderChoice choice)
         {
-            ErrorText.Text = "Select a folder.";
+            ErrorText.Text = LocalizationService.Translate("Select a folder.", ((App)Application.Current).Controller.Settings.Language);
             return;
         }
 
@@ -139,13 +142,13 @@ public partial class QuickTemplateWindow : Window
             var folderName = NewFolderBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(folderName))
             {
-                ErrorText.Text = "Enter a name for the new folder.";
+                ErrorText.Text = LocalizationService.Translate("Enter a name for the new folder.", ((App)Application.Current).Controller.Settings.Language);
                 NewFolderBox.Focus();
                 return;
             }
             if (_folders.Any(x => string.Equals(x.Name, folderName, StringComparison.OrdinalIgnoreCase)))
             {
-                ErrorText.Text = "A folder with this name already exists. Select it from the list above.";
+                ErrorText.Text = LocalizationService.Translate("A folder with this name already exists. Select it from the list above.", ((App)Application.Current).Controller.Settings.Language);
                 NewFolderBox.Focus();
                 return;
             }

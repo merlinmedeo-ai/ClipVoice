@@ -15,10 +15,14 @@ public partial class MainWindow : Window
     private bool _suppressAutoHide;
     private bool _syncingActiveSelection;
     private TemplatePopupWindow? _templatePopup;
+    private string _lastStatusText = "Ready";
 
     public MainWindow()
     {
         InitializeComponent();
+        LocalizationService.Apply(this, AppInstance.Controller.Settings.Language);
+        StatusText.Text = LocalizationService.Translate("Ready", AppInstance.Controller.Settings.Language);
+        TtsStatusText.Text = LocalizationService.Translate("TTS: checking…", AppInstance.Controller.Settings.Language);
         AppVersionText.Text = AppInfo.DisplayVersion;
         Title = $"ClipVoice {AppInfo.DisplayVersion}";
         DataContext = AppInstance.Controller;
@@ -57,7 +61,20 @@ public partial class MainWindow : Window
             Hide();
     }
 
-    private void Controller_StatusChanged(string obj) => Dispatcher.Invoke(() => StatusText.Text = obj);
+    private void Controller_StatusChanged(string obj) => Dispatcher.Invoke(() =>
+    {
+        _lastStatusText = obj;
+        StatusText.Text = LocalizationService.Translate(obj, AppInstance.Controller.Settings.Language);
+    });
+
+    public void ApplyLocalization()
+    {
+        var language = AppInstance.Controller.Settings.Language;
+        LocalizationService.Apply(this, language);
+        StatusText.Text = LocalizationService.Translate(_lastStatusText, language);
+        UpdateHotkeySummary();
+        UpdateTtsHealth();
+    }
     private void Controller_ActiveSelectionChanged() => Dispatcher.Invoke(SyncActiveSelection);
     private void Controller_TtsHealthChanged() => Dispatcher.Invoke(UpdateTtsHealth);
 
@@ -110,9 +127,9 @@ public partial class MainWindow : Window
     private void UpdateHotkeySummary()
     {
         var s = AppInstance.Controller.Settings;
-        var target = TranslationDirectionService.DisplayName(s.PreferredCyrillicTranslationLanguage);
-        HotkeySummaryText.Text = $"{s.HotkeySpeak} — read aloud   •   {s.HotkeyTranslate} — translate   •   {s.HotkeyTranslateSpeak} — translate + speak   •   foreign text → {target}   •   {FormatTemplateMouseGesture(s)} — templates";
-        TemplateMouseHintText.Text = $"{FormatTemplateMouseGesture(s)} — open templates under the cursor";
+        var target = LocalizationService.Translate(TranslationDirectionService.DisplayName(s.PreferredCyrillicTranslationLanguage), s.Language);
+        HotkeySummaryText.Text = LocalizationService.Translate($"{s.HotkeySpeak} — read aloud   •   {s.HotkeyTranslate} — translate   •   {s.HotkeyTranslateSpeak} — translate + speak   •   foreign text → {target}   •   {FormatTemplateMouseGesture(s)} — templates", s.Language);
+        TemplateMouseHintText.Text = LocalizationService.Translate($"{FormatTemplateMouseGesture(s)} — open templates under the cursor", s.Language);
     }
 
 

@@ -865,8 +865,8 @@ public sealed class AppController : IDisposable
                 detectedLanguage, Settings.PreferredCyrillicTranslationLanguage);
             var sourceName = string.IsNullOrWhiteSpace(detectedLanguage)
                 ? "Foreign text"
-                : TranslationDirectionService.DisplayName(detectedLanguage);
-            var targetName = TranslationDirectionService.DisplayName(targetLanguage);
+                : LocalizationService.Translate(TranslationDirectionService.DisplayName(detectedLanguage), Settings.Language);
+            var targetName = LocalizationService.Translate(TranslationDirectionService.DisplayName(targetLanguage), Settings.Language);
             SetStatus($"{sourceName} → {targetName} • translating…");
 
             var translateClock = Stopwatch.StartNew();
@@ -878,7 +878,7 @@ public sealed class AppController : IDisposable
             detectedLanguage = string.IsNullOrWhiteSpace(result.DetectedLanguage)
                 ? detectedLanguage
                 : result.DetectedLanguage;
-            sourceName = TranslationDirectionService.DisplayName(detectedLanguage);
+            sourceName = LocalizationService.Translate(TranslationDirectionService.DisplayName(detectedLanguage), Settings.Language);
             ClipboardService.SetText(result.Text);
             MarkOwnClipboardWrite();
             AddTextToHistory(result.Text);
@@ -1497,8 +1497,8 @@ public sealed class AppController : IDisposable
 
             var sourceName = string.IsNullOrWhiteSpace(detectedLanguage)
                 ? "Foreign text"
-                : TranslationDirectionService.DisplayName(detectedLanguage);
-            var targetName = TranslationDirectionService.DisplayName(targetLanguage);
+                : LocalizationService.Translate(TranslationDirectionService.DisplayName(detectedLanguage), Settings.Language);
+            var targetName = LocalizationService.Translate(TranslationDirectionService.DisplayName(targetLanguage), Settings.Language);
             SetStatus($"{sourceName} → {targetName} • translating…");
 
             var translateClock = Stopwatch.StartNew();
@@ -1507,7 +1507,7 @@ public sealed class AppController : IDisposable
             if (!string.IsNullOrWhiteSpace(result.DetectedLanguage))
             {
                 detectedLanguage = result.DetectedLanguage;
-                sourceName = TranslationDirectionService.DisplayName(detectedLanguage);
+                sourceName = LocalizationService.Translate(TranslationDirectionService.DisplayName(detectedLanguage), Settings.Language);
             }
 
             var translated = result.Text;

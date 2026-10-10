@@ -2,6 +2,7 @@ namespace ClipVoice.Models;
 
 public sealed class AppSettings
 {
+    public string Language { get; set; } = "en";
     public string HotkeyPanel { get; set; } = "Ctrl+Alt+Space";
     public string HotkeySpeak { get; set; } = "Ctrl+Alt+S";
     public string HotkeyTranslate { get; set; } = "Ctrl+Alt+T";

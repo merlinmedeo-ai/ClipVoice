@@ -37,6 +37,7 @@ public partial class App : Application
             await Controller.InitializeAsync();
             MainPanel = new MainWindow();
             EdgeHandle = new EdgeHandleWindow();
+            ApplyLocalization();
             Controller.BindWindows(MainPanel, EdgeHandle);
 
             CreateTray();
@@ -48,6 +49,25 @@ public partial class App : Application
             LogService.Write("Startup failure", ex);
             MessageBox.Show("ClipVoice could not start.\n\n" + ex.Message + "\n\nDetails were saved to %LocalAppData%\\ClipVoice\\logs", "ClipVoice", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown();
+        }
+    }
+
+    public void ApplyLocalization()
+    {
+        var language = LocalizationService.NormalizeLanguage(Controller?.Settings.Language);
+        if (MainPanel is not null) MainPanel.ApplyLocalization();
+        if (EdgeHandle is not null) LocalizationService.Apply(EdgeHandle, language);
+        if (_tray?.ContextMenuStrip is Forms.ContextMenuStrip menu)
+        {
+            var labels = language switch
+            {
+                "ru" => new[] { "Открыть ClipVoice", "Настройки", "Состояние озвучивания", "Приостановить / продолжить буфер", "Выход" },
+                "uk" => new[] { "Відкрити ClipVoice", "Налаштування", "Стан озвучення", "Призупинити / відновити буфер", "Вихід" },
+                _ => new[] { "Open ClipVoice", "Settings", "Speech status", "Pause / resume clipboard", "Exit" }
+            };
+            var labelIndex = 0;
+            foreach (Forms.ToolStripItem item in menu.Items)
+                if (item is not Forms.ToolStripSeparator && labelIndex < labels.Length) item.Text = labels[labelIndex++];
         }
     }
 

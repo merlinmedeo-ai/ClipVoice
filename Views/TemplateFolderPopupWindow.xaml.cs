@@ -27,6 +27,7 @@ public partial class TemplateFolderPopupWindow : Window
         Func<TextTemplate, InputTarget, Task> selectAsync)
     {
         InitializeComponent();
+        LocalizationService.Apply(this, ((App)Application.Current).Controller.Settings.Language);
         _folder = folder;
         _target = target;
         _anchorRightX = anchorRightX;
