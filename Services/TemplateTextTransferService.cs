@@ -45,7 +45,7 @@ public static class TemplateTextTransferService
     {
         using var reader = new StringReader(text);
         if (!string.Equals(reader.ReadLine(), Header, StringComparison.Ordinal))
-            throw new InvalidDataException("Это не TXT-файл шаблонов ClipVoice или его формат не поддерживается.");
+            throw new InvalidDataException("This is not a ClipVoice template TXT file, or its format is unsupported.");
 
         var folders = new List<TemplateFolder>();
         TemplateFolder? currentFolder = null;
@@ -55,25 +55,25 @@ public static class TemplateTextTransferService
             if (line.StartsWith(FolderPrefix, StringComparison.Ordinal))
             {
                 var name = ReadJsonString(line[FolderPrefix.Length..]);
-                if (string.IsNullOrWhiteSpace(name)) throw new InvalidDataException("В файле есть папка без названия.");
+                if (string.IsNullOrWhiteSpace(name)) throw new InvalidDataException("The file contains a folder without a name.");
                 currentFolder = new TemplateFolder { Name = name };
                 folders.Add(currentFolder);
                 continue;
             }
 
             if (!line.StartsWith(TemplatePrefix, StringComparison.Ordinal) || currentFolder is null)
-                throw new InvalidDataException("Неожиданная строка в TXT-файле шаблонов.");
+                throw new InvalidDataException("Unexpected line in the template TXT file.");
 
             var fields = line.Split('\t');
             if (fields.Length != 5 || fields[0] != "TEMPLATE"
                 || !bool.TryParse(fields[3], out var pasteOnHotkey)
                 || !bool.TryParse(fields[4], out var isSecret))
-                throw new InvalidDataException("Не удалось прочитать свойства шаблона из TXT-файла.");
+                throw new InvalidDataException("Could not read template properties from the TXT file.");
 
             var nameValue = ReadJsonString(fields[1]);
             var hotkeyValue = ReadJsonString(fields[2]);
-            if (string.IsNullOrWhiteSpace(nameValue)) throw new InvalidDataException("В файле есть шаблон без названия.");
-            if (reader.ReadLine() != "CONTENT") throw new InvalidDataException("В TXT-файле отсутствует содержимое шаблона.");
+            if (string.IsNullOrWhiteSpace(nameValue)) throw new InvalidDataException("The file contains a template without a name.");
+            if (reader.ReadLine() != "CONTENT") throw new InvalidDataException("Template content is missing from the TXT file.");
 
             var content = new List<string>();
             var ended = false;
@@ -82,7 +82,7 @@ public static class TemplateTextTransferService
                 if (line == EndTemplate) { ended = true; break; }
                 content.Add(line.StartsWith('\\') ? line[1..] : line);
             }
-            if (!ended) throw new InvalidDataException("TXT-файл оборван: не найден конец шаблона.");
+            if (!ended) throw new InvalidDataException("The TXT file is incomplete: template end marker was not found.");
 
             currentFolder.Templates.Add(new TextTemplate
             {
@@ -94,10 +94,10 @@ public static class TemplateTextTransferService
             });
         }
 
-        if (folders.Count == 0) throw new InvalidDataException("В TXT-файле нет папок для импорта.");
+        if (folders.Count == 0) throw new InvalidDataException("The TXT file contains no folders to import.");
         return folders;
     }
 
     private static string ReadJsonString(string value) => JsonSerializer.Deserialize<string>(value)
-        ?? throw new InvalidDataException("Не удалось прочитать текстовое поле в TXT-файле.");
+        ?? throw new InvalidDataException("Could not read a text field from the TXT file.");
 }

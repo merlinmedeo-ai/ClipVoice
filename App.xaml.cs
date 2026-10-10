@@ -23,7 +23,7 @@ public partial class App : Application
         _singleInstance = new Mutex(true, @"Local\ClipVoice.SingleInstance", out var firstInstance);
         if (!firstInstance)
         {
-            MessageBox.Show("ClipVoice уже запущен. Найди значок приложения в трее или используй горячую клавишу панели.", "ClipVoice", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("ClipVoice is already running. Find its icon in the system tray or use the panel hotkey.", "ClipVoice", MessageBoxButton.OK, MessageBoxImage.Information);
             Shutdown();
             return;
         }
@@ -46,7 +46,7 @@ public partial class App : Application
         catch (Exception ex)
         {
             LogService.Write("Startup failure", ex);
-            MessageBox.Show("ClipVoice не смог запуститься.\n\n" + ex.Message + "\n\nПодробности записаны в %LocalAppData%\\ClipVoice\\logs", "ClipVoice", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show("ClipVoice could not start.\n\n" + ex.Message + "\n\nDetails were saved to %LocalAppData%\\ClipVoice\\logs", "ClipVoice", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown();
         }
     }
@@ -54,7 +54,7 @@ public partial class App : Application
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         LogService.Write("UI error", e.Exception);
-        MessageBox.Show("Произошла ошибка, но ClipVoice попробует продолжить работу.\n\n" + e.Exception.Message, "ClipVoice", MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBox.Show("An error occurred, but ClipVoice will try to continue.\n\n" + e.Exception.Message, "ClipVoice", MessageBoxButton.OK, MessageBoxImage.Warning);
         e.Handled = true;
     }
 
@@ -66,12 +66,12 @@ public partial class App : Application
     private void CreateTray()
     {
         var menu = new Forms.ContextMenuStrip();
-        menu.Items.Add("Открыть ClipVoice", null, (_, _) => Dispatcher.Invoke(() => Controller.ShowPanel()));
-        menu.Items.Add("Настройки", null, (_, _) => Dispatcher.Invoke(() => new SettingsWindow(0) { Owner = MainPanel }.ShowDialog()));
-        menu.Items.Add("Состояние озвучки", null, (_, _) => Dispatcher.Invoke(() => new SettingsWindow(2) { Owner = MainPanel }.ShowDialog()));
-        menu.Items.Add("Пауза / продолжить буфер", null, (_, _) => Controller.ToggleClipboardMonitoring());
+        menu.Items.Add("Open ClipVoice", null, (_, _) => Dispatcher.Invoke(() => Controller.ShowPanel()));
+        menu.Items.Add("Settings", null, (_, _) => Dispatcher.Invoke(() => new SettingsWindow(0) { Owner = MainPanel }.ShowDialog()));
+        menu.Items.Add("Speech status", null, (_, _) => Dispatcher.Invoke(() => new SettingsWindow(2) { Owner = MainPanel }.ShowDialog()));
+        menu.Items.Add("Pause / resume clipboard", null, (_, _) => Controller.ToggleClipboardMonitoring());
         menu.Items.Add(new Forms.ToolStripSeparator());
-        menu.Items.Add("Выход", null, (_, _) => Dispatcher.Invoke(ExitApplication));
+        menu.Items.Add("Exit", null, (_, _) => Dispatcher.Invoke(ExitApplication));
 
         _trayIcon = LoadAppIcon();
         _tray = new Forms.NotifyIcon

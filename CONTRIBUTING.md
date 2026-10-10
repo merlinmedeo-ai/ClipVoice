@@ -1,23 +1,23 @@
-# Участие в разработке
+# Contributing
 
-Спасибо за интерес к ClipVoice.
+Thank you for your interest in ClipVoice.
 
-## Локальная разработка
+## Local development
 
-1. Установите .NET SDK 8 или запустите `tools\ensure-dotnet.ps1`.
-2. Выполните `dotnet restore`.
-3. Запустите `dotnet build ClipVoice.csproj -c Release`.
-4. Проверьте изменённые сценарии вручную на Windows 10 или Windows 11.
+1. Install the .NET 8 SDK or run `tools\ensure-dotnet.ps1`.
+2. Run `dotnet restore`.
+3. Build with `dotnet build ClipVoice.csproj -c Release`.
+4. Manually verify changed scenarios on Windows 10 or Windows 11.
 
 ## Pull requests
 
-- Делайте одно логическое изменение в одном pull request.
-- Не добавляйте содержимое `bin`, `obj`, `dist` и `.dotnet`.
-- Не прикладывайте историю буфера, шаблоны, журналы или другие пользовательские данные.
-- Описывайте способ проверки и заметные изменения поведения.
-- Для изменений Win32-интеграции проверьте глобальные горячие клавиши, буфер обмена и корректное завершение приложения.
-- Для изменений TTS проверьте отмену операции, недоступность сети и освобождение дочернего процесса Piper.
+- Keep each pull request focused on one logical change.
+- Do not add `bin`, `obj`, `dist`, or `.dotnet` contents.
+- Do not include clipboard history, templates, logs, or other user data.
+- Describe how the change was verified and any behavior changes.
+- For Win32 integration changes, check global hotkeys, clipboard behavior, and clean shutdown.
+- For TTS changes, check cancellation, offline behavior, and Piper child-process cleanup.
 
-## Стиль
+## Style
 
-Сохраняйте nullable-аннотации, асинхронную отмену через `CancellationToken` и существующее разделение между `Views`, `Services`, `Models` и `Native`.
+Preserve nullable annotations, `CancellationToken` support, and the existing separation between `Views`, `Services`, `Models`, and `Native`.

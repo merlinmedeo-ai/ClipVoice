@@ -61,11 +61,11 @@
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <Button Style="{StaticResource PopupFolderButton}" Click="SpeakSelection_Click"
-                            ToolTip="Озвучить выделенный текст" Padding="8,5" HorizontalContentAlignment="Center">
+                            ToolTip="Read selected text aloud" Padding="8,5" HorizontalContentAlignment="Center">
                         <TextBlock Text="♫" Foreground="#AAA3FF" FontSize="16" FontWeight="SemiBold"/>
                     </Button>
                     <Button Grid.Column="1" Style="{StaticResource PopupFolderButton}" Click="TranslateSpeakSelection_Click"
-                            ToolTip="Перевести и озвучить выделенный текст" Padding="8,5" HorizontalContentAlignment="Center">
+                            ToolTip="Translate and speak selected text" Padding="8,5" HorizontalContentAlignment="Center">
                         <TextBlock Text="文♫" Foreground="#AAA3FF" FontSize="15" FontWeight="SemiBold"/>
                     </Button>
                 </Grid>
@@ -73,14 +73,14 @@
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                         <TextBlock Text="＋" Foreground="#AAA3FF" FontSize="16" Margin="0,0,9,0"/>
-                        <TextBlock Grid.Column="1" Text="Создать из выделенного текста" Foreground="#F0EEFF" FontSize="12" FontWeight="SemiBold"/>
+                        <TextBlock Grid.Column="1" Text="Create from selected text" Foreground="#F0EEFF" FontSize="12" FontWeight="SemiBold"/>
                     </Grid>
                 </Button>
                 <Button Grid.Row="3" Style="{StaticResource PopupFolderButton}" Click="Settings_Click" Padding="11,9">
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                         <TextBlock Text="⚙" Foreground="#AAA3FF" FontSize="14" Margin="0,0,9,0"/>
-                        <TextBlock Grid.Column="1" Text="Настроить шаблоны" Foreground="#DDE0E8" FontSize="12"/>
+                        <TextBlock Grid.Column="1" Text="Manage templates" Foreground="#DDE0E8" FontSize="12"/>
                     </Grid>
                 </Button>
             </Grid>

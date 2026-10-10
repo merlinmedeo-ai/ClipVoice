@@ -80,7 +80,7 @@ public partial class TemplateFolderPopupWindow : Window
             TextTrimming = TextTrimming.CharacterEllipsis
         });
 
-        var preview = template.IsSecret ? "Содержимое скрыто" : CompactPreview(template.Content);
+        var preview = template.IsSecret ? "Content hidden" : CompactPreview(template.Content);
         if (!string.IsNullOrWhiteSpace(preview))
         {
             textStack.Children.Add(new TextBlock
@@ -109,7 +109,7 @@ public partial class TemplateFolderPopupWindow : Window
                 Foreground = new SolidColorBrush(Color.FromRgb(170, 163, 255)),
                 FontSize = 8,
                 Margin = new Thickness(0, 0, 8, 0),
-                ToolTip = "Секретный шаблон"
+                ToolTip = "Secret template"
             });
         }
 

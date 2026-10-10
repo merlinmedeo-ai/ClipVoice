@@ -36,9 +36,9 @@ public partial class MainWindow : Window
             AppInstance.Controller.StartBackgroundServices();
             AppInstance.Controller.ShowPanel();
             if (AppInstance.Controller.LastHotkeyErrors.Count > 0)
-                StatusText.Text = "Есть конфликт горячих клавиш — открой настройки.";
+                StatusText.Text = "A hotkey conflict was detected. Open Settings.";
             else if (AppInstance.Controller.Settings.EnableAltRightClickTemplates && !AppInstance.Controller.TemplateMouseHookAvailable)
-                StatusText.Text = $"{FormatTemplateMouseGesture(AppInstance.Controller.Settings)} недоступно: Windows не разрешила глобальный перехват мыши. Остальные функции работают.";
+                StatusText.Text = $"{FormatTemplateMouseGesture(AppInstance.Controller.Settings)} is unavailable: Windows did not allow global mouse tracking. Other features are still available.";
         };
         Deactivated += MainWindow_Deactivated;
         IsVisibleChanged += (_, _) =>
@@ -82,11 +82,11 @@ public partial class MainWindow : Window
         TtsStatusText.Foreground = anyReady ? new SolidColorBrush(Color.FromRgb(112, 221, 173))
             : anyBusy || anyInstalled ? new SolidColorBrush(Color.FromRgb(232, 196, 102))
             : new SolidColorBrush(Color.FromRgb(232, 106, 122));
-        TtsStatusText.ToolTip = $"Последняя озвучка: {health.ActiveProvider}\n" +
+        TtsStatusText.ToolTip = $"Last speech provider: {health.ActiveProvider}\n" +
             $"Edge: {health.Edge.Detail}\nGoogle: {health.Google.Detail}\nPiper: {health.Piper.Detail}\n" +
-            $"Память ClipVoice: {health.AppMemoryMb} МБ" +
-            (health.PiperMemoryMb is long p ? $" + Piper {p} МБ" : string.Empty) +
-            $" / лимит {health.MemoryLimitMb} МБ";
+            $"ClipVoice memory: {health.AppMemoryMb} MB" +
+            (health.PiperMemoryMb is long p ? $" + Piper {p} MB" : string.Empty) +
+            $" / limit {health.MemoryLimitMb} MB";
     }
 
     private void SyncActiveSelection()
@@ -111,13 +111,13 @@ public partial class MainWindow : Window
     {
         var s = AppInstance.Controller.Settings;
         var target = TranslationDirectionService.DisplayName(s.PreferredCyrillicTranslationLanguage);
-        HotkeySummaryText.Text = $"{s.HotkeySpeak} — озвучить   •   {s.HotkeyTranslate} — автоперевод   •   {s.HotkeyTranslateSpeak} — перевод + озвучка   •   иностранный → {target}   •   {FormatTemplateMouseGesture(s)} — шаблоны";
-        TemplateMouseHintText.Text = $"{FormatTemplateMouseGesture(s)} — открыть шаблоны под курсором";
+        HotkeySummaryText.Text = $"{s.HotkeySpeak} — read aloud   •   {s.HotkeyTranslate} — translate   •   {s.HotkeyTranslateSpeak} — translate + speak   •   foreign text → {target}   •   {FormatTemplateMouseGesture(s)} — templates";
+        TemplateMouseHintText.Text = $"{FormatTemplateMouseGesture(s)} — open templates under the cursor";
     }
 
 
     private static string FormatTemplateMouseGesture(AppSettings settings)
-        => (settings.TemplateMouseModifier ?? "Alt").Replace("+", " + ") + " + ПКМ";
+        => (settings.TemplateMouseModifier ?? "Alt").Replace("+", " + ") + " + right-click";
 
     private void Controller_TemplateMenuRequested(InputTarget target, int x, int y)
     {
@@ -163,7 +163,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            StatusText.Text = "Не удалось получить выделенный текст: " + ex.Message;
+            StatusText.Text = "Could not retrieve the selected text: " + ex.Message;
             return;
         }
 
@@ -186,7 +186,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            StatusText.Text = "Не удалось создать шаблон: " + ex.Message;
+            StatusText.Text = "Could not create the template: " + ex.Message;
         }
         finally
         {
@@ -208,7 +208,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            StatusText.Text = "Не удалось получить выделенный текст: " + ex.Message;
+            StatusText.Text = "Could not retrieve the selected text: " + ex.Message;
             return;
         }
 
@@ -227,7 +227,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            StatusText.Text = "Не удалось получить выделенный текст: " + ex.Message;
+            StatusText.Text = "Could not retrieve the selected text: " + ex.Message;
             return;
         }
 

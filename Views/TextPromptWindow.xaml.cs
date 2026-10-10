@@ -7,7 +7,7 @@ public partial class TextPromptWindow : Window
 {
     public string Value => ValueBox.Text;
 
-    public TextPromptWindow(string title, string prompt, string initial, string acceptText = "Сохранить")
+    public TextPromptWindow(string title, string prompt, string initial, string acceptText = "Save")
     {
         InitializeComponent();
         Title = title;

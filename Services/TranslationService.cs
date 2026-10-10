@@ -108,7 +108,7 @@ public sealed class TranslationService
         catch { }
 
         throw new InvalidOperationException(
-            "Ни один онлайн-переводчик не ответил. Подробности записаны в журнал ClipVoice.",
+            "None of the online translation services responded. See the ClipVoice log for details.",
             new AggregateException(errors));
     }
 
@@ -125,7 +125,7 @@ public sealed class TranslationService
             {
                 var result = await action();
                 if (string.IsNullOrWhiteSpace(result.Text))
-                    throw new InvalidOperationException(provider + " вернул пустой перевод.");
+                    throw new InvalidOperationException(provider + " returned an empty translation.");
                 return result with { Provider = provider };
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
@@ -155,7 +155,7 @@ public sealed class TranslationService
         using var doc = JsonDocument.Parse(body);
         var root = doc.RootElement;
         if (root.ValueKind != JsonValueKind.Array || root.GetArrayLength() == 0)
-            throw new InvalidOperationException("неожиданный формат ответа");
+            throw new InvalidOperationException("Unexpected response format");
 
         var translated = new StringBuilder();
         if (root[0].ValueKind == JsonValueKind.Array)
@@ -167,7 +167,7 @@ public sealed class TranslationService
             }
         }
 
-        if (translated.Length == 0) throw new InvalidOperationException("перевод не получен");
+        if (translated.Length == 0) throw new InvalidOperationException("No translation was received");
         var detected = root.GetArrayLength() > 2 && root[2].ValueKind == JsonValueKind.String
             ? root[2].GetString() ?? string.Empty
             : string.Empty;
@@ -220,7 +220,7 @@ public sealed class TranslationService
             detected = FindLikelyLanguageCode(root);
         }
 
-        if (translated.Length == 0) throw new InvalidOperationException("перевод не получен");
+        if (translated.Length == 0) throw new InvalidOperationException("No translation was received");
         return new TranslationResult(translated.ToString(), detected);
     }
 
@@ -250,17 +250,17 @@ public sealed class TranslationService
                     : int.TryParse(status.ToString(), out var p) ? p : 200;
                 if (statusCode >= 400)
                 {
-                    var details = root.TryGetProperty("responseDetails", out var d) ? d.ToString() : "ошибка сервиса";
+                    var details = root.TryGetProperty("responseDetails", out var d) ? d.ToString() : "service error";
                     throw new InvalidOperationException($"HTTP {statusCode}: {details}");
                 }
             }
 
             if (!root.TryGetProperty("responseData", out var data) || data.ValueKind != JsonValueKind.Object ||
                 !data.TryGetProperty("translatedText", out var translatedText) || translatedText.ValueKind != JsonValueKind.String)
-                throw new InvalidOperationException("неожиданный формат ответа");
+                throw new InvalidOperationException("Unexpected response format");
 
             var translated = WebUtility.HtmlDecode(translatedText.GetString() ?? string.Empty);
-            if (string.IsNullOrWhiteSpace(translated)) throw new InvalidOperationException("перевод не получен");
+            if (string.IsNullOrWhiteSpace(translated)) throw new InvalidOperationException("No translation was received");
             output.Append(translated);
 
             if (string.IsNullOrWhiteSpace(detected) && data.TryGetProperty("detectedLanguage", out var dl) && dl.ValueKind == JsonValueKind.String)
@@ -304,8 +304,8 @@ public sealed class TranslationService
 
     private static string ShortError(Exception? ex)
     {
-        if (ex is null) return "неизвестная ошибка";
-        if (ex is TaskCanceledException) return "тайм-аут";
+        if (ex is null) return "Unknown error";
+        if (ex is TaskCanceledException) return "Request timed out";
         if (ex is HttpRequestException) return ex.Message;
         return ex.Message.Length > 140 ? ex.Message[..140] : ex.Message;
     }

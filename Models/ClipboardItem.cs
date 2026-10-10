@@ -15,7 +15,7 @@ public sealed class ClipboardItem
     [JsonIgnore]
     public string Preview => Kind == ClipboardItemKind.Text
         ? (Text.Length > 180 ? Text[..180] + "…" : Text)
-        : $"📁 {Files.Count} файл(ов): {string.Join(", ", Files.Select(Path.GetFileName).Take(3))}";
+        : $"📁 {Files.Count} file(s): {string.Join(", ", Files.Select(Path.GetFileName).Take(3))}";
 
     [JsonIgnore]
     public string TimeText => CreatedAt.ToString("HH:mm");

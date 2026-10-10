@@ -9,7 +9,7 @@
             <Grid Grid.Row="0" Background="{StaticResource Panel}" MouseLeftButtonDown="Header_MouseLeftButtonDown">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                 <TextBlock x:Name="DialogTitleText" Margin="18,0,8,0" VerticalAlignment="Center" FontSize="15" FontWeight="SemiBold"/>
-                <Button Grid.Column="1" Width="38" Height="34" Margin="0,8,10,8" Padding="0" ToolTip="Закрыть" Click="Cancel_Click">
+                <Button Grid.Column="1" Width="38" Height="34" Margin="0,8,10,8" Padding="0" ToolTip="Close" Click="Cancel_Click">
                     <TextBlock Text="×" FontSize="18"/>
                 </Button>
             </Grid>
@@ -19,10 +19,10 @@
                 <TextBox x:Name="ValueBox" Grid.Row="1" Margin="0,9,0,18" MinHeight="40" VerticalContentAlignment="Center"/>
                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                     <Button Width="104" Margin="0,0,8,0" Click="Cancel_Click">
-                        <TextBlock Text="Отмена"/>
+                        <TextBlock Text="Cancel"/>
                     </Button>
                     <Button x:Name="AcceptButton" MinWidth="132" Background="{StaticResource Accent}" Click="Ok_Click">
-                        <TextBlock x:Name="AcceptButtonText" Text="Сохранить"/>
+                        <TextBlock x:Name="AcceptButtonText" Text="Save"/>
                     </Button>
                 </StackPanel>
             </Grid>

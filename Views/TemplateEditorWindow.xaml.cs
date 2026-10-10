@@ -14,9 +14,9 @@ public partial class TemplateEditorWindow : Window
     {
         InitializeComponent();
         var settings = ((App)Application.Current).Controller.Settings;
-        var gesture = (settings.TemplateMouseModifier ?? "Alt").Replace("+", " + ") + " + ПКМ";
-        InsertionHintText.Text = $"Этот текст будет вставлен в место курсора через {gesture} или через горячую клавишу шаблона.";
-        HotkeyHintText.Text = $"Горячая клавиша необязательна: кликни поле справа и нажми сочетание, например Ctrl+Alt+1. Все шаблоны также доступны через {gesture}.";
+        var gesture = (settings.TemplateMouseModifier ?? "Alt").Replace("+", " + ") + " + right-click";
+        InsertionHintText.Text = $"This text will be inserted at the cursor through {gesture} or its template hotkey.";
+        HotkeyHintText.Text = $"A hotkey is optional: click the field on the right and press a shortcut, such as Ctrl+Alt+1. All templates remain available through {gesture}.";
         _id = source?.Id ?? Guid.NewGuid();
         SecretCheck.IsChecked = source?.IsSecret ?? false;
         if (source is not null)
@@ -44,8 +44,8 @@ public partial class TemplateEditorWindow : Window
     private void Save_Click(object sender, RoutedEventArgs e)
     {
         ErrorText.Text = "";
-        if (string.IsNullOrWhiteSpace(NameBox.Text)) { ErrorText.Text = "Укажи название шаблона."; return; }
-        if (string.IsNullOrWhiteSpace(ContentBox.Text)) { ErrorText.Text = "Текст шаблона пустой."; return; }
+        if (string.IsNullOrWhiteSpace(NameBox.Text)) { ErrorText.Text = "Enter a template name."; return; }
+        if (string.IsNullOrWhiteSpace(ContentBox.Text)) { ErrorText.Text = "Template text cannot be empty."; return; }
         if (!string.IsNullOrWhiteSpace(HotkeyBox.Text))
         {
             if (!HotkeyParser.TryParse(HotkeyBox.Text, out _, out _, out var normalized, out var error))

@@ -13,7 +13,7 @@ public static class HotkeyParser
         error = string.Empty;
         if (string.IsNullOrWhiteSpace(value))
         {
-            error = "Комбинация не задана";
+            error = "No shortcut was entered";
             return false;
         }
 
@@ -29,12 +29,12 @@ public static class HotkeyParser
             {
                 if (key != Key.None)
                 {
-                    error = "В комбинации должна быть одна основная клавиша";
+                    error = "The shortcut must contain exactly one primary key";
                     return false;
                 }
                 if (!TryParseKey(part, out key))
                 {
-                    error = $"Неизвестная клавиша: {part}";
+                    error = $"Unknown key: {part}";
                     return false;
                 }
             }
@@ -42,19 +42,19 @@ public static class HotkeyParser
 
         if (key == Key.None)
         {
-            error = "Нужна основная клавиша";
+            error = "A primary key is required";
             return false;
         }
         if (modifiers == 0)
         {
-            error = "Добавь Ctrl, Alt, Shift или Win, чтобы не перехватывать обычную клавишу во всей системе";
+            error = "Add Ctrl, Alt, Shift, or Win to avoid capturing a regular key system-wide";
             return false;
         }
 
         virtualKey = (uint)KeyInterop.VirtualKeyFromKey(key);
         if (virtualKey == 0)
         {
-            error = "Эту клавишу нельзя использовать как глобальную";
+            error = "This key cannot be used as a global shortcut";
             return false;
         }
         normalized = Format(modifiers, key);

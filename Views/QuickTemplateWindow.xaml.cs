@@ -37,7 +37,7 @@ public partial class QuickTemplateWindow : Window
 
         foreach (var folder in _folders)
             FolderList.Items.Add(new FolderChoice { Id = folder.Id, Name = folder.Name });
-        FolderList.Items.Add(new FolderChoice { Name = "+ Создать новую папку…", IsNew = true });
+        FolderList.Items.Add(new FolderChoice { Name = "+ Create a new folder…", IsNew = true });
         FolderList.SelectedIndex = _folders.Count > 0 ? 0 : FolderList.Items.Count - 1;
 
         Loaded += (_, _) =>
@@ -94,7 +94,7 @@ public partial class QuickTemplateWindow : Window
             .Trim();
         while (line.Contains("  ")) line = line.Replace("  ", " ");
         if (line.Length > 42) line = line[..42].TrimEnd() + "…";
-        return string.IsNullOrWhiteSpace(line) ? "Новый шаблон" : line;
+        return string.IsNullOrWhiteSpace(line) ? "New template" : line;
     }
 
     private void FolderList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -123,14 +123,14 @@ public partial class QuickTemplateWindow : Window
         var name = NameBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(name))
         {
-            ErrorText.Text = "Укажи название шаблона.";
+            ErrorText.Text = "Enter a template name.";
             NameBox.Focus();
             return;
         }
 
         if (FolderList.SelectedItem is not FolderChoice choice)
         {
-            ErrorText.Text = "Выбери папку.";
+            ErrorText.Text = "Select a folder.";
             return;
         }
 
@@ -139,13 +139,13 @@ public partial class QuickTemplateWindow : Window
             var folderName = NewFolderBox.Text.Trim();
             if (string.IsNullOrWhiteSpace(folderName))
             {
-                ErrorText.Text = "Укажи название новой папки.";
+                ErrorText.Text = "Enter a name for the new folder.";
                 NewFolderBox.Focus();
                 return;
             }
             if (_folders.Any(x => string.Equals(x.Name, folderName, StringComparison.OrdinalIgnoreCase)))
             {
-                ErrorText.Text = "Такая папка уже есть. Выбери её в списке выше.";
+                ErrorText.Text = "A folder with this name already exists. Select it from the list above.";
                 NewFolderBox.Focus();
                 return;
             }

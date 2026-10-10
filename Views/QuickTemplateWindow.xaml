@@ -1,7 +1,7 @@
 <Window x:Class="ClipVoice.Views.QuickTemplateWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Создать шаблон" Width="560" Height="620"
+        Title="Create template" Width="560" Height="620"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
         Background="#0D1016" Foreground="#F4F5F8"
         ShowInTaskbar="False" ShowActivated="True" Topmost="True">
@@ -65,20 +65,20 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Создать шаблон из выделения" FontSize="21" FontWeight="SemiBold"/>
-        <TextBlock Grid.Row="1" Text="Текст уже взят из выделенного фрагмента. Дай шаблону имя и выбери папку."
+        <TextBlock Text="Create a template from selection" FontSize="21" FontWeight="SemiBold"/>
+        <TextBlock Grid.Row="1" Text="The selected text has been captured. Name the template and choose a folder."
                    Foreground="#9FA8BA" Margin="0,5,0,16" TextWrapping="Wrap"/>
 
         <StackPanel Grid.Row="2">
-            <TextBlock Text="Название шаблона" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <TextBlock Text="Template name" FontWeight="SemiBold" Margin="0,0,0,6"/>
             <TextBox x:Name="NameBox" MaxLength="120"/>
         </StackPanel>
 
         <StackPanel Grid.Row="3" Margin="0,15,0,0">
             <Grid Margin="0,0,0,6">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                <TextBlock Text="Папка" FontWeight="SemiBold"/>
-                <TextBlock Grid.Column="1" Text="выбери из списка" Foreground="#7F899C" FontSize="11"/>
+                <TextBlock Text="Folder" FontWeight="SemiBold"/>
+                <TextBlock Grid.Column="1" Text="choose from the list" Foreground="#7F899C" FontSize="11"/>
             </Grid>
             <Border Background="#111620" BorderBrush="#2A3140" BorderThickness="1" CornerRadius="10" Padding="6">
                 <ListBox x:Name="FolderList" Height="155" SelectionChanged="FolderList_SelectionChanged"
@@ -98,14 +98,14 @@
         </StackPanel>
 
         <StackPanel x:Name="NewFolderPanel" Grid.Row="4" Margin="0,12,0,0" Visibility="Collapsed">
-            <TextBlock Text="Название новой папки" FontWeight="SemiBold" Margin="0,0,0,6"/>
+            <TextBlock Text="New folder name" FontWeight="SemiBold" Margin="0,0,0,6"/>
             <TextBox x:Name="NewFolderBox" MaxLength="80"/>
         </StackPanel>
 
         <Border Grid.Row="5" Margin="0,15,0,0" Background="#121722" BorderBrush="#2A3140" BorderThickness="1" Padding="12" CornerRadius="10">
             <Grid>
                 <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-                <TextBlock Text="Текст шаблона" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                <TextBlock Text="Template text" FontWeight="SemiBold" Margin="0,0,0,6"/>
                 <ScrollViewer Grid.Row="1" MaxHeight="120" VerticalScrollBarVisibility="Auto">
                     <TextBlock x:Name="PreviewText" Foreground="#C8CFDD" TextWrapping="Wrap"/>
                 </ScrollViewer>
@@ -119,8 +119,8 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock x:Name="ErrorText" VerticalAlignment="Center" Foreground="#E86A7A" TextWrapping="Wrap"/>
-            <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="Отмена" Margin="8,0,0,0" Click="Cancel_Click"/>
-            <Button Grid.Column="2" Style="{StaticResource PrimaryButton}" Content="Создать шаблон" Margin="10,0,0,0" Click="Create_Click"/>
+            <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="Cancel" Margin="8,0,0,0" Click="Cancel_Click"/>
+            <Button Grid.Column="2" Style="{StaticResource PrimaryButton}" Content="Create template" Margin="10,0,0,0" Click="Create_Click"/>
         </Grid>
     </Grid>
 </Window>

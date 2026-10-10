@@ -1,7 +1,7 @@
-# Безопасность
+# Security
 
-Не публикуйте сведения об уязвимости в открытом issue, если они позволяют получить доступ к пользовательским данным или выполнить код.
+Do not report vulnerabilities in a public issue if they could expose user data or allow code execution.
 
-До появления отдельного приватного канала связи создайте краткий issue без технических деталей и попросите владельца репозитория связаться с вами приватно. Не прикладывайте журналы, историю буфера, шаблоны, токены или другие чувствительные данные.
+Until a private reporting channel is available, open a brief issue without technical details and ask the repository owner to contact you privately. Do not include logs, clipboard history, templates, tokens, or other sensitive data.
 
-Поддерживается только актуальная версия из основной ветки. Исправления безопасности для старых сборок отдельно не выпускаются.
+Only the latest version on the main branch is supported. Security fixes are not released separately for older builds.

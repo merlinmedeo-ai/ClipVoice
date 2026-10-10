@@ -29,7 +29,7 @@ public sealed class GoogleTranslateTtsService
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
         timeout.CancelAfter(TimeSpan.FromSeconds(8));
         var data = await FetchChunkAsync("ok", "en", 1.0, timeout.Token);
-        if (data.Length < 64) throw new InvalidOperationException("Google TTS вернул пустой ответ.");
+        if (data.Length < 64) throw new InvalidOperationException("Google TTS returned an empty response.");
     }
 
     public async Task<string> SynthesizeAsync(string text, string languageCode, int speechRatePercent = 0, CancellationToken ct = default)
@@ -47,8 +47,8 @@ public sealed class GoogleTranslateTtsService
     private async Task<string> SynthesizeCoreAsync(string text, string languageCode, int speechRatePercent, CancellationToken ct)
     {
         var totalClock = Stopwatch.StartNew();
-        if (string.IsNullOrWhiteSpace(text)) throw new InvalidOperationException("Нет текста для озвучки.");
-        if (text.Length > 8_000) throw new InvalidOperationException("Резервная озвучка не предназначена для очень длинного текста.");
+        if (string.IsNullOrWhiteSpace(text)) throw new InvalidOperationException("There is no text to read aloud.");
+        if (text.Length > 8_000) throw new InvalidOperationException("Fallback speech is not intended for very long text.");
 
         var lang = NormalizeLanguage(languageCode);
         var speed = Math.Clamp(1.0 + Math.Clamp(speechRatePercent, -50, 100) / 100.0, 0.5, 2.0);
@@ -79,7 +79,7 @@ public sealed class GoogleTranslateTtsService
                 if (chunkNumber < chunks.Count) await Task.Delay(80, ct);
             }
             await output.FlushAsync(ct);
-            if (output.Length < 128) throw new InvalidOperationException("Резервный сервис не вернул аудио.");
+            if (output.Length < 128) throw new InvalidOperationException("The fallback service returned no audio.");
             output.Close();
             File.Move(temp, path, true);
             _storage.PruneAudioCache(path);
@@ -119,14 +119,14 @@ public sealed class GoogleTranslateTtsService
                     }
                     response.EnsureSuccessStatusCode();
                     var data = await response.Content.ReadAsByteArrayAsync(ct);
-                    if (data.Length < 64) throw new InvalidOperationException("Пустой ответ резервной озвучки.");
+                    if (data.Length < 64) throw new InvalidOperationException("The fallback speech response is empty.");
                     return data;
                 }
                 catch (OperationCanceledException) { throw; }
                 catch (Exception ex) { last = ex; }
             }
         }
-        throw new InvalidOperationException("Резервная онлайн-озвучка тоже недоступна.", last);
+        throw new InvalidOperationException("Fallback online speech is also unavailable.", last);
     }
 
     private static string NormalizeLanguage(string? lang)

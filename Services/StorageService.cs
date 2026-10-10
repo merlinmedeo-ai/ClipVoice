@@ -143,7 +143,7 @@ public sealed class StorageService
         foreach (var f in state.TemplateFolders)
             result.Add(new TemplateFolder { Id = f.Id == Guid.Empty ? Guid.NewGuid() : f.Id, Name = f.Name, Templates = new ObservableCollection<TextTemplate>(f.Templates) });
         if (result.Count == 0)
-            result.Add(new TemplateFolder { Name = "Мои шаблоны" });
+            result.Add(new TemplateFolder { Name = "My templates" });
         return result;
     }
 
@@ -173,7 +173,7 @@ public sealed class StorageService
     {
         TemplateFolders = new List<TemplateFolderDto>
         {
-            new() { Id = Guid.NewGuid(), Name = "Мои шаблоны", Templates = new List<TextTemplate>() }
+            new() { Id = Guid.NewGuid(), Name = "My templates", Templates = new List<TextTemplate>() }
         }
     };
 }

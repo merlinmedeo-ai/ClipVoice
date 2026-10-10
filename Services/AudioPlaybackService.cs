@@ -17,7 +17,7 @@ public sealed class AudioPlaybackService
     private int _traceSamples;
     private string? _operationId;
     private TaskCompletionSource<bool>? _playbackCompletion;
-    private string _playbackProvider = "неизвестно";
+    private string _playbackProvider = "Unknown";
     private int _playbackChars;
     private int _playbackWords;
     private int _playbackRatePercent;
@@ -70,13 +70,13 @@ public sealed class AudioPlaybackService
             if (!IsPendingSourceCurrent()) return;
             _playWhenOpened = false;
             _pendingSource = null;
-            var failure = e.ErrorException ?? new InvalidOperationException("Не удалось открыть аудио.");
+            var failure = e.ErrorException ?? new InvalidOperationException("Could not open audio.");
             LogService.Write("Audio media failed", failure);
             _playbackCompletion?.TrySetException(failure);
         };
     }
 
-    public void Play(string path, string provider = "неизвестно", string speechText = "", int ratePercent = 0)
+    public void Play(string path, string provider = "Unknown", string speechText = "", int ratePercent = 0)
     {
         BeginPlayback(path, null, provider, speechText, ratePercent);
     }
@@ -155,9 +155,9 @@ public sealed class AudioPlaybackService
         player.MediaOpened += (_, _) =>
         {
             if (player.NaturalDuration.HasTimeSpan) completion.TrySetResult(player.NaturalDuration.TimeSpan);
-            else completion.TrySetException(new InvalidOperationException("Движок не сообщил длительность аудио."));
+            else completion.TrySetException(new InvalidOperationException("The engine did not report the audio duration."));
         };
-        player.MediaFailed += (_, e) => completion.TrySetException(e.ErrorException ?? new InvalidOperationException("Не удалось прочитать аудиофайл."));
+        player.MediaFailed += (_, e) => completion.TrySetException(e.ErrorException ?? new InvalidOperationException("Could not read the audio file."));
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
         timeout.CancelAfter(TimeSpan.FromSeconds(15));
         using var registration = timeout.Token.Register(() => completion.TrySetCanceled(timeout.Token));

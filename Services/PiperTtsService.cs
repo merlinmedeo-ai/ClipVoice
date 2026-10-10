@@ -87,7 +87,7 @@ public sealed class PiperTtsService : IDisposable
             ct.ThrowIfCancellationRequested();
             await EnsureVoiceAsync(lang, ct);
         }
-        ProgressChanged?.Invoke("Локальный резерв готов: русский, украинский и английский работают без Интернета.");
+        ProgressChanged?.Invoke("Offline fallback is ready: Russian, Ukrainian, and English work without an internet connection.");
     }
 
     public async Task PrepareLanguageAsync(string languageCode, CancellationToken ct = default)
@@ -95,13 +95,13 @@ public sealed class PiperTtsService : IDisposable
         var lang = NormalizeLanguage(languageCode);
         await EnsureRuntimeAsync(ct);
         await EnsureVoiceAsync(lang, ct);
-        ProgressChanged?.Invoke($"Локальный голос {lang.ToUpperInvariant()} сохранён для офлайн-резерва.");
+        ProgressChanged?.Invoke($"The local {lang.ToUpperInvariant()} voice is ready for offline use.");
     }
 
     public async Task ProbeAsync(CancellationToken ct = default)
     {
         // Use unique text so the probe really starts Piper instead of returning a cached WAV.
-        var probeText = "Проверка офлайн озвучки " + DateTime.UtcNow.Ticks.ToString();
+        var probeText = "Offline speech check " + DateTime.UtcNow.Ticks.ToString();
         var file = await SynthesizeAsync(probeText, "ru", speechRatePercent: 0, ct: ct);
         try { if (File.Exists(file)) File.Delete(file); } catch { }
     }
@@ -121,8 +121,8 @@ public sealed class PiperTtsService : IDisposable
     private async Task<string> SynthesizeCoreAsync(string text, string languageCode, int speechRatePercent, CancellationToken ct)
     {
         var totalClock = Stopwatch.StartNew();
-        if (string.IsNullOrWhiteSpace(text)) throw new InvalidOperationException("Нет текста для локальной озвучки.");
-        if (text.Length > 12_000) throw new InvalidOperationException("Для локальной аварийной озвучки выдели фрагмент до 12 000 символов.");
+        if (string.IsNullOrWhiteSpace(text)) throw new InvalidOperationException("There is no text for local speech.");
+        if (text.Length > 12_000) throw new InvalidOperationException("For local fallback speech, select a passage of up to 12,000 characters.");
 
         var lang = NormalizeLanguage(languageCode);
         var speed = Math.Clamp(1.0 + Math.Clamp(speechRatePercent, -50, 100) / 100.0, 0.5, 2.0);
@@ -180,8 +180,8 @@ public sealed class PiperTtsService : IDisposable
             appCapApplied = TryApplyWorkingSetCap(appProcess, AppWorkingSetCapMb);
             if (appCapApplied) TryEmptyWorkingSet(appProcess);
 
-            ProgressChanged?.Invoke($"Piper локально • {lang.ToUpperInvariant()} • создаю аудио…");
-            if (!process.Start()) throw new InvalidOperationException("Не удалось запустить локальный Piper.");
+            ProgressChanged?.Invoke($"Piper offline • {lang.ToUpperInvariant()} • generating audio…");
+            if (!process.Start()) throw new InvalidOperationException("Could not start the local Piper process.");
             _activeProcess = process;
             LogService.Info($"Piper process started: language={lang}; startup_elapsed_ms={totalClock.ElapsedMilliseconds}");
 
@@ -221,7 +221,7 @@ public sealed class PiperTtsService : IDisposable
                     if (overBudgetSamples >= 5)
                     {
                         try { process.Kill(true); } catch { }
-                        throw new InvalidOperationException($"Piper не удалось удержать в лимите {MemoryLimitMb} МБ RAM даже после ограничения рабочего набора.");
+                        throw new InvalidOperationException($"Piper could not stay within the {MemoryLimitMb} MB RAM limit, even after reducing its working set.");
                     }
                 }
                 else
@@ -232,9 +232,9 @@ public sealed class PiperTtsService : IDisposable
             await waitTask;
             var stderr = await stderrTask;
             if (process.ExitCode != 0)
-                throw new InvalidOperationException("Piper завершился с ошибкой" + (string.IsNullOrWhiteSpace(stderr) ? "." : ": " + LastLine(stderr)));
+                throw new InvalidOperationException("Piper exited with an error" + (string.IsNullOrWhiteSpace(stderr) ? "." : ": " + LastLine(stderr)));
             if (!File.Exists(processOutput) || new FileInfo(processOutput).Length < 256)
-                throw new InvalidOperationException("Piper не создал аудиофайл.");
+                throw new InvalidOperationException("Piper did not create an audio file.");
             File.Move(processOutput, output, true);
             _storage.PruneAudioCache(output);
             LogService.Info($"Piper synthesis complete: language={lang}; bytes={new FileInfo(output).Length}; process_exit_code={process.ExitCode}; elapsed_ms={totalClock.ElapsedMilliseconds}");
@@ -243,7 +243,7 @@ public sealed class PiperTtsService : IDisposable
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)
         {
             try { if (!process.HasExited) process.Kill(true); } catch { }
-            throw new TimeoutException("Локальная озвучка Piper не успела завершиться.");
+            throw new TimeoutException("Local Piper speech did not finish in time.");
         }
         finally
         {
@@ -323,7 +323,7 @@ public sealed class PiperTtsService : IDisposable
         var existing = FindRuntimeExe();
         if (existing is not null) return existing;
         if (RuntimeInformation.ProcessArchitecture != Architecture.X64)
-            throw new PlatformNotSupportedException("Локальный Piper в этой сборке подготовлен для Windows x64. Онлайн-озвучка продолжает работать.");
+            throw new PlatformNotSupportedException("Local Piper in this build is configured for Windows x64. Online speech is still available.");
 
         await _installLock.WaitAsync(ct);
         try
@@ -331,7 +331,7 @@ public sealed class PiperTtsService : IDisposable
             existing = FindRuntimeExe();
             if (existing is not null) return existing;
 
-            ProgressChanged?.Invoke("Локальный резерв: один раз скачиваю движок Piper…");
+            ProgressChanged?.Invoke("Offline fallback: downloading the Piper runtime…");
             var zip = Path.Combine(_storage.PiperDirectory, "piper-runtime.zip.tmp");
             var stage = Path.Combine(_storage.PiperDirectory, "runtime.tmp");
             var target = Path.Combine(_storage.PiperDirectory, "runtime");
@@ -351,7 +351,7 @@ public sealed class PiperTtsService : IDisposable
             }
 
             existing = FindRuntimeExe();
-            if (existing is null) throw new InvalidOperationException("Архив Piper скачан, но piper.exe внутри не найден.");
+            if (existing is null) throw new InvalidOperationException("The Piper archive was downloaded, but piper.exe was not found inside it.");
             return existing;
         }
         finally { _installLock.Release(); }
@@ -370,7 +370,7 @@ public sealed class PiperTtsService : IDisposable
             if (installed is not null) return installed;
 
             var profile = CoreProfile(lang) ?? await FindSmallestCatalogVoiceAsync(lang, ct)
-                ?? throw new InvalidOperationException($"Для языка {lang.ToUpperInvariant()} в локальном Piper не найден голос.");
+                ?? throw new InvalidOperationException($"No local Piper voice was found for {lang.ToUpperInvariant()}.");
 
             var voiceDir = Path.Combine(_storage.PiperVoicesDirectory, profile.Family, SanitizeFileName(profile.Key));
             Directory.CreateDirectory(voiceDir);
@@ -380,7 +380,7 @@ public sealed class PiperTtsService : IDisposable
             if (!File.Exists(model) || new FileInfo(model).Length < Math.Max(1_000_000, profile.SizeBytes / 3))
             {
                 var mb = Math.Max(1, profile.SizeBytes / (1024 * 1024));
-                ProgressChanged?.Invoke($"Локальный резерв: скачиваю голос {lang.ToUpperInvariant()} (~{mb} МБ)…");
+                ProgressChanged?.Invoke($"Offline fallback: downloading the {lang.ToUpperInvariant()} voice (~{mb} MB)…");
                 await DownloadFileAsync(VoiceBaseUrl + profile.ModelPath + "?download=true", model + ".tmp", ct);
                 File.Move(model + ".tmp", model, true);
             }
@@ -475,7 +475,7 @@ public sealed class PiperTtsService : IDisposable
 
         try
         {
-            ProgressChanged?.Invoke("Локальный резерв: получаю каталог голосов Piper…");
+            ProgressChanged?.Invoke("Offline fallback: retrieving the Piper voice catalog…");
             var json = await _http.GetStringAsync(CatalogUrl, ct);
             try { await File.WriteAllTextAsync(_storage.PiperCatalogFile, json, new UTF8Encoding(false), ct); } catch { }
             return json;

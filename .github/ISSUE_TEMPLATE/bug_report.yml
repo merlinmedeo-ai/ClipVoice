@@ -1,44 +1,44 @@
-name: Сообщение об ошибке
-description: Сообщить о воспроизводимой проблеме в ClipVoice
+name: Bug report
+description: Report a reproducible issue in ClipVoice
 title: "[Bug]: "
 labels: [bug]
 body:
   - type: markdown
     attributes:
-      value: Не прикладывайте содержимое буфера обмена, приватные шаблоны, токены или другие чувствительные данные.
+      value: Do not include clipboard contents, private templates, tokens, or other sensitive data.
   - type: textarea
     id: description
     attributes:
-      label: Описание
-      description: Что произошло и чего вы ожидали?
+      label: Description
+      description: What happened, and what did you expect to happen?
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Как воспроизвести
+      label: Steps to reproduce
       placeholder: |
-        1. Запустить...
-        2. Нажать...
-        3. Увидеть...
+        1. Start...
+        2. Click...
+        3. Observe...
     validations:
       required: true
   - type: input
     id: version
     attributes:
-      label: Версия ClipVoice
+      label: ClipVoice version
       placeholder: 1.0.0
     validations:
       required: true
   - type: input
     id: windows
     attributes:
-      label: Версия Windows
+      label: Windows version
       placeholder: Windows 11 24H2
     validations:
       required: true
   - type: textarea
     id: context
     attributes:
-      label: Дополнительный контекст
-      description: Допустимы обезличенные фрагменты журнала без пользовательского текста и секретов.
+      label: Additional context
+      description: Redacted log excerpts are welcome, but do not include user text or secrets.

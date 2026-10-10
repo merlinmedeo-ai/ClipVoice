@@ -2,51 +2,51 @@
 
 ![ClipVoice](Assets/ClipVoice.png)
 
-ClipVoice — компактное приложение для Windows, которое объединяет историю буфера обмена, текстовые шаблоны, перевод и озвучивание текста.
+ClipVoice is a Windows app for clipboard history, reusable text templates, translation, and text-to-speech.
 
-## Возможности
+## Features
 
-- история последних элементов буфера обмена;
-- быстрые текстовые шаблоны и вставка по горячим клавишам;
-- вызов шаблонов через `Alt + ПКМ`;
-- перевод выделенного текста или содержимого буфера;
-- онлайн-озвучка через Edge и резервный Google TTS;
-- необязательный локальный Piper для работы без Интернета;
-- хранение состояния с защитой Windows DPAPI;
-- работа из системного трея и настраиваемые глобальные горячие клавиши.
+- Recent clipboard history
+- Reusable text templates and global hotkeys
+- Template menu with `Alt + Right-click`
+- Translation of selected text or clipboard content
+- Online speech through Edge with Google TTS as a fallback
+- Optional offline Piper speech
+- Local settings protected with Windows DPAPI
+- System tray support and configurable hotkeys
 
-## Системные требования
+## Requirements
 
-- Windows 10 или Windows 11, x64;
-- для разработки: .NET SDK 8;
-- подключение к Интернету для онлайн-перевода, онлайн-TTS и первоначальной загрузки Piper.
+- Windows 10 or Windows 11, x64
+- .NET SDK 8 for development
+- Internet access for online translation, online speech, and the initial Piper download
 
-Готовая автономная сборка содержит .NET runtime и не требует отдельной установки .NET.
+The self-contained release includes the .NET runtime and does not require a separate .NET installation.
 
-## Быстрый запуск из исходников
+## Run from source
 
 ```powershell
 dotnet restore
 dotnet run --project ClipVoice.csproj
 ```
 
-Если .NET SDK не установлен глобально, проект содержит сценарий, который загружает локальный SDK в исключённую из Git папку `.dotnet`:
+If the .NET SDK is not installed globally, the project can download a local SDK into `.dotnet` (which Git ignores):
 
 ```powershell
 .\run-debug.bat
 ```
 
-## Создание автономного EXE
+## Build a standalone executable
 
-Запустите:
+Run:
 
 ```powershell
 .\build-exe.bat
 ```
 
-Результат появится в `dist\ClipVoice-1.0.0-win-x64\ClipVoice.exe`. Папка `dist` намеренно исключена из Git: бинарные сборки лучше публиковать через GitHub Releases.
+The executable is created at `dist\ClipVoice-1.0.0-win-x64\ClipVoice.exe`. The `dist` directory is excluded from Git; publish binary builds through GitHub Releases.
 
-Эквивалентная команда:
+Equivalent command:
 
 ```powershell
 dotnet publish ClipVoice.csproj `
@@ -58,31 +58,31 @@ dotnet publish ClipVoice.csproj `
   -p:EnableCompressionInSingleFile=true
 ```
 
-## Данные и приватность
+## Data and privacy
 
-Настройки, история буфера, шаблоны, журналы и аудиокэш сохраняются в `%LocalAppData%\ClipVoice` и не находятся внутри репозитория. Содержимое истории и шаблонов защищается через Windows DPAPI для текущего пользователя.
+Settings, clipboard history, templates, logs, and the audio cache are stored in `%LocalAppData%\ClipVoice`, outside the repository. History and templates are protected with Windows DPAPI for the current user.
 
-Для перевода и онлайн-озвучки текст отправляется соответствующим внешним сервисам. Локальный Piper работает без сети после загрузки движка и голосовых моделей. В приложении используются неофициальные потребительские интерфейсы онлайн-сервисов, поэтому их работа может измениться без предупреждения.
+Text is sent to the relevant external services when you use online translation or speech. Piper works offline after its runtime and voice models have been downloaded. The app uses unofficial consumer interfaces for online services, so they may change without notice.
 
-## Структура проекта
+## Project structure
 
-- `Views/` — окна и WPF-разметка;
-- `Services/` — буфер обмена, интеграция с Windows, перевод и TTS;
-- `Models/` — настройки и модели данных;
-- `Native/` — объявления Win32 API;
-- `Assets/` — иконки приложения;
-- `tools/` — сценарии подготовки локального SDK.
+- `Views/` — WPF windows and layouts
+- `Services/` — clipboard, Windows integration, translation, and speech
+- `Models/` — settings and data models
+- `Native/` — Win32 declarations
+- `Assets/` — application icons
+- `tools/` — local SDK setup scripts
 
-## Участие в разработке
+## Contributing
 
-Перед отправкой pull request выполните Release-сборку:
+Before opening a pull request, run a Release build:
 
 ```powershell
 dotnet build ClipVoice.csproj -c Release
 ```
 
-Подробности находятся в [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-## Лицензия
+## License
 
-Лицензия пока не выбрана. До добавления файла `LICENSE` стандартное авторское право сохраняется за владельцем проекта; публичное размещение исходников само по себе не предоставляет разрешения на копирование, изменение или распространение.
+No license has been selected yet. Until a `LICENSE` file is added, standard copyright remains with the project owner. Publicly visible source code does not, by itself, grant permission to copy, modify, or distribute it.

@@ -6,7 +6,7 @@ namespace ClipVoice.Models;
 public sealed class TextTemplate
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public string Name { get; set; } = "Новый шаблон";
+    public string Name { get; set; } = "New template";
     public string Content { get; set; } = string.Empty;
     public string Hotkey { get; set; } = string.Empty;
     public bool PasteOnHotkey { get; set; } = true;
@@ -16,7 +16,7 @@ public sealed class TextTemplate
     public string PreviewContent => IsSecret ? "••••••••" : Content;
 
     [JsonIgnore]
-    public string HotkeyBadge => string.IsNullOrWhiteSpace(Hotkey) ? "без горячей клавиши" : Hotkey;
+    public string HotkeyBadge => string.IsNullOrWhiteSpace(Hotkey) ? "no hotkey" : Hotkey;
 
     public override string ToString() => Name;
 }
@@ -24,7 +24,7 @@ public sealed class TextTemplate
 public sealed class TemplateFolder
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public string Name { get; set; } = "Новая папка";
+    public string Name { get; set; } = "New folder";
     public ObservableCollection<TextTemplate> Templates { get; set; } = new();
     public override string ToString() => Name;
 }

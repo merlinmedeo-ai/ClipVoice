@@ -27,8 +27,8 @@ public partial class SettingsWindow : Window
     public SettingsWindow(int initialTab = 0, bool createTemplateImmediately = false)
     {
         InitializeComponent();
-        Title = $"Настройки ClipVoice {AppInfo.DisplayVersion}";
-        SettingsTitleText.Text = $"Настройки ClipVoice {AppInfo.DisplayVersion}";
+        Title = $"ClipVoice Settings {AppInfo.DisplayVersion}";
+        SettingsTitleText.Text = $"ClipVoice Settings {AppInfo.DisplayVersion}";
         SourceInitialized += (_, _) => FitToMonitorWorkArea();
         var s = AppInstance.Controller.Settings;
         PanelHotkey.Text = s.HotkeyPanel;
@@ -158,16 +158,16 @@ public partial class SettingsWindow : Window
         var availableWidth = Math.Max(720, workArea.Width - edgeGap * 2);
         var availableHeight = Math.Max(560, workArea.Height - edgeGap * 2);
 
-        // Сначала уменьшаем минимумы, и только потом задаём максимумы: это важно
-        // для небольших экранов, где рабочая область может быть ниже исходного MinHeight.
+        // Reduce the minimum size before setting the maximum; smaller screens may
+        // have a work area below the original MinHeight.
         MinWidth = Math.Min(900, availableWidth);
         MinHeight = Math.Min(620, availableHeight);
         MaxWidth = availableWidth;
         MaxHeight = availableHeight;
 
         Width = Math.Min(1120, availableWidth);
-        // Используем почти всю рабочую высоту, чтобы списки папок/шаблонов оставались высокими,
-        // но окно никогда не заходило под панель задач.
+        // Use most of the work area so folder and template lists stay tall,
+        // while keeping the window clear of the taskbar.
         Height = availableHeight;
 
         Left = workArea.Left + Math.Max(edgeGap, (workArea.Width - Width) / 2);
@@ -182,18 +182,18 @@ public partial class SettingsWindow : Window
         {
             if (!AppInstance.Controller.CopyDiagnosticLogsToClipboard())
             {
-                MessageBox.Show(this, "Ошибок пока не записано.",
-                    "Журнал ошибок", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(this, "No errors have been recorded yet.",
+                    "Error log", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-            MessageBox.Show(this, "Журнал ошибок скопирован.",
-                "Журнал ошибок", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(this, "The error log was copied.",
+                "Error log", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
             LogService.Write("Could not copy diagnostic logs", ex);
-            MessageBox.Show(this, "Не удалось скопировать логи: " + ex.Message,
-                "Диагностика озвучки", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, "Could not copy the logs: " + ex.Message,
+                "Speech diagnostics", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -210,23 +210,23 @@ public partial class SettingsWindow : Window
         catch (Exception ex)
         {
             LogService.Write("Could not open audio cache folder", ex);
-            MessageBox.Show(this, "Не удалось открыть папку аудиокэша: " + ex.Message,
-                "Аудиокэш", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, "Could not open the audio cache folder: " + ex.Message,
+                "Audio cache", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
     private void UpdateTtsHealth()
     {
         var health = AppInstance.Controller.GetTtsHealthSnapshot();
-        ActiveTtsText.Text = "Последний: " + health.ActiveProvider;
+        ActiveTtsText.Text = "Last: " + health.ActiveProvider;
         EdgeTtsHealthText.Text = FormatProvider(health.Edge);
         GoogleTtsHealthText.Text = FormatProvider(health.Google);
         PiperTtsHealthText.Text = FormatProvider(health.Piper);
         EdgeTtsHealthText.Foreground = StateBrush(health.Edge.State);
         GoogleTtsHealthText.Foreground = StateBrush(health.Google.State);
         PiperTtsHealthText.Foreground = StateBrush(health.Piper.State);
-        var piperPart = health.PiperMemoryMb is long p ? $" + Piper {p} МБ" : string.Empty;
-        TtsMemoryText.Text = $"Память сейчас: ClipVoice {health.AppMemoryMb} МБ{piperPart} = {health.TotalMemoryMb} МБ / лимит {health.MemoryLimitMb} МБ";
+        var piperPart = health.PiperMemoryMb is long p ? $" + Piper {p} MB" : string.Empty;
+        TtsMemoryText.Text = $"Memory now: ClipVoice {health.AppMemoryMb} MB{piperPart} = {health.TotalMemoryMb} MB / limit {health.MemoryLimitMb} MB";
         TtsMemoryText.Foreground = health.TotalMemoryMb >= health.MemoryLimitMb - 10
             ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(232, 106, 122))
             : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(154, 164, 181));
@@ -236,13 +236,13 @@ public partial class SettingsWindow : Window
     {
         var prefix = provider.State switch
         {
-            TtsProviderState.Ready => "Работает — ",
-            TtsProviderState.Checking => "Проверяется — ",
-            TtsProviderState.Preparing => "Подготовка — ",
-            TtsProviderState.Installed => "Установлен — ",
-            TtsProviderState.Missing => "Не готов — ",
-            TtsProviderState.Failed => "Недоступен — ",
-            _ => "Не проверен — "
+            TtsProviderState.Ready => "Ready — ",
+            TtsProviderState.Checking => "Checking — ",
+            TtsProviderState.Preparing => "Preparing — ",
+            TtsProviderState.Installed => "Installed — ",
+            TtsProviderState.Missing => "Not ready — ",
+            TtsProviderState.Failed => "Unavailable — ",
+            _ => "Not checked — "
         };
         var checkedAt = provider.LastCheckedUtc is DateTime time ? $" • {time.ToLocalTime():HH:mm}" : string.Empty;
         return prefix + provider.Detail + checkedAt;
@@ -259,31 +259,31 @@ public partial class SettingsWindow : Window
 
     private async void CheckTts_Click(object sender, RoutedEventArgs e)
     {
-        SaveStatusText.Text = "Проверяю Edge, Google и запускаю реальный офлайн-тест Piper…";
+        SaveStatusText.Text = "Checking Edge and Google, then running a real Piper offline test…";
         try
         {
             await AppInstance.Controller.CheckTtsHealthAsync();
-            SaveStatusText.Text = "Проверка озвучки завершена.";
+            SaveStatusText.Text = "Speech check completed.";
         }
         catch (Exception ex)
         {
-            SaveStatusText.Text = "Ошибка проверки: " + ex.Message;
+            SaveStatusText.Text = "Check failed: " + ex.Message;
         }
         UpdateTtsHealth();
     }
 
     private async void MeasureTtsSpeed_Click(object sender, RoutedEventArgs e)
     {
-        SaveStatusText.Text = "Озвучиваю одинаковую тестовую фразу Edge, Google и Piper и измеряю длительность…";
+        SaveStatusText.Text = "Reading the same test phrase with Edge, Google, and Piper and measuring duration…";
         try
         {
             var results = await AppInstance.Controller.DiagnoseTtsSpeechSpeedAsync();
-            SaveStatusText.Text = "Сравнение скорости завершено.";
-            MessageBox.Show(this, results, "Скорость озвучки", MessageBoxButton.OK, MessageBoxImage.Information);
+            SaveStatusText.Text = "Speed comparison completed.";
+            MessageBox.Show(this, results, "Speech speed", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            SaveStatusText.Text = "Ошибка сравнения: " + ex.Message;
+            SaveStatusText.Text = "Comparison failed: " + ex.Message;
         }
         UpdateTtsHealth();
     }
@@ -291,15 +291,15 @@ public partial class SettingsWindow : Window
     private async void PrepareLocalTts_Click(object sender, RoutedEventArgs e)
     {
         PrepareLocalTtsButton.IsEnabled = false;
-        SaveStatusText.Text = "Подготавливаю локальный резерв. Первый раз нужно скачать движок и три голоса…";
+        SaveStatusText.Text = "Preparing the offline fallback. The runtime and three voices must be downloaded once…";
         try
         {
             await AppInstance.Controller.PrepareLocalTtsAsync(background: false);
-            SaveStatusText.Text = "Piper и голоса установлены. Нажми «Проверить все, включая офлайн», чтобы подтвердить реальный синтез.";
+            SaveStatusText.Text = "Piper and its voices are installed. Click “Check all, including offline” to verify synthesis.";
         }
         catch (Exception ex)
         {
-            SaveStatusText.Text = "Не удалось подготовить Piper: " + ex.Message;
+            SaveStatusText.Text = "Could not prepare Piper: " + ex.Message;
         }
         finally
         {
@@ -412,7 +412,7 @@ public partial class SettingsWindow : Window
             var newIndex = Math.Clamp(insertionIndex, 0, Math.Max(0, _folders.Count - 1));
             if (newIndex != oldIndex) _folders.Move(oldIndex, newIndex);
             FolderList.SelectedItem = draggedFolder;
-            SaveStatusText.Text = "Порядок папок изменён. Нажми «Сохранить изменения».";
+            SaveStatusText.Text = "Folder order changed. Click “Save changes”.";
             e.Handled = true;
             return;
         }
@@ -427,7 +427,7 @@ public partial class SettingsWindow : Window
                 targetFolder.Templates.Add(payload.Template);
                 FolderList.SelectedItem = targetFolder;
                 TemplateList.SelectedItem = payload.Template;
-                SaveStatusText.Text = $"Шаблон «{payload.Template.Name}» перемещён в «{targetFolder.Name}». Нажми «Сохранить изменения».";
+                SaveStatusText.Text = $"Template “{payload.Template.Name}” moved to “{targetFolder.Name}”. Click “Save changes”.";
                 ValidateHotkeysLive();
             }
             e.Handled = true;
@@ -482,7 +482,7 @@ public partial class SettingsWindow : Window
         }
 
         TemplateList.SelectedItem = payload.Template;
-        SaveStatusText.Text = "Порядок шаблонов изменён. Нажми «Сохранить изменения».";
+        SaveStatusText.Text = "Template order changed. Click “Save changes”.";
         ValidateHotkeysLive();
         e.Handled = true;
     }
@@ -494,7 +494,7 @@ public partial class SettingsWindow : Window
 
     private void AddFolder_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new TextPromptWindow("Новая папка", "Название папки:", "Новая папка", "Создать папку") { Owner = this };
+        var dialog = new TextPromptWindow("New folder", "Folder name:", "New folder", "Create folder") { Owner = this };
         if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.Value))
         {
             var folder = new TemplateFolder { Name = dialog.Value.Trim() };
@@ -506,7 +506,7 @@ public partial class SettingsWindow : Window
     private void RenameFolder_Click(object sender, RoutedEventArgs e)
     {
         if (FolderList.SelectedItem is not TemplateFolder folder) return;
-        var dialog = new TextPromptWindow("Переименовать папку", "Новое название:", folder.Name, "Переименовать") { Owner = this };
+        var dialog = new TextPromptWindow("Rename folder", "New name:", folder.Name, "Rename") { Owner = this };
         if (dialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(dialog.Value))
         {
             folder.Name = dialog.Value.Trim();
@@ -517,8 +517,8 @@ public partial class SettingsWindow : Window
     private void DeleteFolder_Click(object sender, RoutedEventArgs e)
     {
         if (FolderList.SelectedItem is not TemplateFolder folder) return;
-        if (_folders.Count <= 1) { SaveStatusText.Text = "Нельзя удалить последнюю папку."; return; }
-        if (folder.Templates.Count > 0 && MessageBox.Show(this, $"Удалить папку «{folder.Name}» и все шаблоны внутри?", "ClipVoice", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        if (_folders.Count <= 1) { SaveStatusText.Text = "The last folder cannot be deleted."; return; }
+        if (folder.Templates.Count > 0 && MessageBox.Show(this, $"Delete folder “{folder.Name}” and all templates in it?", "ClipVoice", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
         var index = _folders.IndexOf(folder);
         _folders.Remove(folder);
         FolderList.SelectedIndex = Math.Max(0, Math.Min(index, _folders.Count - 1));
@@ -526,13 +526,13 @@ public partial class SettingsWindow : Window
 
     private void AddTemplate_Click(object sender, RoutedEventArgs e)
     {
-        if (FolderList.SelectedItem is not TemplateFolder folder) { SaveStatusText.Text = "Сначала выбери папку."; return; }
+        if (FolderList.SelectedItem is not TemplateFolder folder) { SaveStatusText.Text = "Select a folder first."; return; }
         var editor = new TemplateEditorWindow(null) { Owner = this };
         if (editor.ShowDialog() == true && editor.Result is not null)
         {
             folder.Templates.Add(editor.Result);
             TemplateList.SelectedItem = editor.Result;
-            SaveStatusText.Text = "Шаблон создан. Нажми «Сохранить изменения», чтобы применить его и горячую клавишу.";
+            SaveStatusText.Text = "Template created. Click “Save changes” to apply it and its hotkey.";
             ValidateHotkeysLive();
         }
     }
@@ -553,7 +553,7 @@ public partial class SettingsWindow : Window
     private void DeleteTemplate_Click(object sender, RoutedEventArgs e)
     {
         if (FolderList.SelectedItem is not TemplateFolder folder || TemplateList.SelectedItem is not TextTemplate template) return;
-        if (MessageBox.Show(this, $"Удалить шаблон «{template.Name}»?", "ClipVoice", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+        if (MessageBox.Show(this, $"Delete template “{template.Name}”?", "ClipVoice", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
         {
             folder.Templates.Remove(template);
             ValidateHotkeysLive();
@@ -563,27 +563,27 @@ public partial class SettingsWindow : Window
     private void ExportTemplates_Click(object sender, RoutedEventArgs e)
     {
         if (MessageBox.Show(this,
-                "TXT-файл будет содержать названия и полный текст всех шаблонов, включая помеченные как секретные. Продолжить экспорт?",
-                "Экспорт шаблонов", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+                "The TXT file will contain the names and full text of all templates, including those marked as secret. Continue exporting?",
+                "Export templates", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
 
         var dialog = new SaveFileDialog
         {
-            Title = "Экспорт шаблонов ClipVoice",
-            Filter = "Текстовые файлы (*.txt)|*.txt",
+            Title = "Export ClipVoice templates",
+            Filter = "Text files (*.txt)|*.txt",
             DefaultExt = ".txt",
             AddExtension = true,
-            FileName = "ClipVoice-шаблоны.txt"
+            FileName = "ClipVoice-templates.txt"
         };
         if (dialog.ShowDialog(this) != true) return;
 
         try
         {
             File.WriteAllText(dialog.FileName, TemplateTextTransferService.Export(_folders), new UTF8Encoding(false));
-            SaveStatusText.Text = $"Экспортировано папок: {_folders.Count}. Файл сохранён.";
+            SaveStatusText.Text = $"Exported {_folders.Count} folder(s). File saved.";
         }
         catch (Exception ex)
         {
-            SaveStatusText.Text = "Не удалось экспортировать шаблоны: " + ex.Message;
+            SaveStatusText.Text = "Could not export templates: " + ex.Message;
         }
     }
 
@@ -591,8 +591,8 @@ public partial class SettingsWindow : Window
     {
         var dialog = new OpenFileDialog
         {
-            Title = "Импорт шаблонов ClipVoice",
-            Filter = "Текстовые файлы (*.txt)|*.txt",
+            Title = "Import ClipVoice templates",
+            Filter = "Text files (*.txt)|*.txt",
             CheckFileExists = true,
             Multiselect = false
         };
@@ -605,13 +605,13 @@ public partial class SettingsWindow : Window
             var firstImported = imported[0];
             foreach (var folder in imported) _folders.Add(folder);
             FolderList.SelectedItem = firstImported;
-            SaveStatusText.Text = $"Добавлено папок: {imported.Count}, шаблонов: {templateCount}. Нажми «Сохранить изменения», чтобы применить импорт.";
+            SaveStatusText.Text = $"Added {imported.Count} folder(s) and {templateCount} template(s). Click “Save changes” to apply the import.";
             ValidateHotkeysLive();
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "Не удалось импортировать TXT-файл. Проверь, что это экспорт ClipVoice.\n\n" + ex.Message,
-                "Ошибка импорта", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(this, "Could not import the TXT file. Check that it was exported by ClipVoice.\n\n" + ex.Message,
+                "Import error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -623,7 +623,7 @@ public partial class SettingsWindow : Window
         if (validation.Count > 0)
         {
             SaveStatusText.Text = string.Join(Environment.NewLine, validation);
-            SettingsTabs.SelectedIndex = validation.Any(x => x.StartsWith("Шаблон", StringComparison.OrdinalIgnoreCase)) ? 3 : 1;
+            SettingsTabs.SelectedIndex = validation.Any(x => x.StartsWith("Template", StringComparison.OrdinalIgnoreCase)) ? 3 : 1;
             return;
         }
         AppInstance.Controller.ReplaceTemplateFolders(_folders);
@@ -631,7 +631,7 @@ public partial class SettingsWindow : Window
         if (registration.Count > 0)
         {
             SaveStatusText.Text = string.Join(Environment.NewLine, registration);
-            SettingsTabs.SelectedIndex = registration.Any(x => x.StartsWith("Шаблон", StringComparison.OrdinalIgnoreCase)) ? 3 : 1;
+            SettingsTabs.SelectedIndex = registration.Any(x => x.StartsWith("Template", StringComparison.OrdinalIgnoreCase)) ? 3 : 1;
             return;
         }
         DialogResult = true;

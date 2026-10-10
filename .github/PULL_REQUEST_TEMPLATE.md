@@ -1,13 +1,13 @@
-## Что изменено
+## What changed
 
-Опишите изменение и его цель.
+Describe the change and its purpose.
 
-## Проверка
+## Verification
 
-- [ ] `dotnet build ClipVoice.csproj -c Release` проходит без ошибок
-- [ ] Изменение проверено вручную на Windows
-- [ ] В diff нет пользовательских данных, журналов, ключей и сборочных артефактов
+- [ ] `dotnet build ClipVoice.csproj -c Release` completes without errors
+- [ ] The change was manually checked on Windows
+- [ ] The diff contains no user data, logs, keys, or build artifacts
 
-## Связанные задачи
+## Related issues
 
-Укажите issue или оставьте раздел пустым.
+Add an issue number or leave this section empty.

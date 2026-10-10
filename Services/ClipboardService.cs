@@ -98,6 +98,6 @@ public static class ClipboardService
             catch (COMException ex) { last = ex; Thread.Sleep(DelayMs); }
             catch (ExternalException ex) { last = ex; Thread.Sleep(DelayMs); }
         }
-        throw last ?? new InvalidOperationException("Не удалось получить доступ к буферу обмена.");
+        throw last ?? new InvalidOperationException("Could not access the clipboard.");
     }
 }

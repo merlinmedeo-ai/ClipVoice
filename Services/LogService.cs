@@ -138,7 +138,7 @@ public static class LogService
         }
         catch (Exception ex)
         {
-            return $"Не удалось прочитать логи ClipVoice: {ex.GetType().Name}";
+            return $"Could not read ClipVoice logs: {ex.GetType().Name}";
         }
     }
 

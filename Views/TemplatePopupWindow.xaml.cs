@@ -71,7 +71,7 @@ public partial class TemplatePopupWindow : Window
         {
             ItemsHost.Children.Add(new TextBlock
             {
-                Text = "Шаблонов пока нет",
+                Text = "No templates yet",
                 Foreground = new SolidColorBrush(Color.FromRgb(164, 171, 188)),
                 Margin = new Thickness(11, 12, 11, 12),
                 FontSize = 12
@@ -89,7 +89,7 @@ public partial class TemplatePopupWindow : Window
         {
             Style = (Style)FindResource("PopupFolderButton"),
             Tag = folder,
-            ToolTip = $"{folder.Templates.Count} шаблон(ов)"
+            ToolTip = $"{folder.Templates.Count} template(s)"
         };
 
         var grid = new Grid();

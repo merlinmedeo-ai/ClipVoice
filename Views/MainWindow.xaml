@@ -22,18 +22,18 @@
                             <TextBlock Text="ClipVoice" Foreground="{StaticResource Text}" FontSize="17" FontWeight="SemiBold"/>
                             <TextBlock x:Name="AppVersionText" Foreground="{StaticResource Muted}" FontSize="10" Margin="7,5,0,0"/>
                         </StackPanel>
-                        <TextBlock Text="буфер • перевод • озвучка" Foreground="{StaticResource Muted}" FontSize="10"/>
+                        <TextBlock Text="clipboard • translation • speech" Foreground="{StaticResource Muted}" FontSize="10"/>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
-                    <Button Content="⌨" Width="42" Click="Hotkeys_Click" ToolTip="Горячие клавиши"/>
-                    <Button Content="⚙" Width="42" Click="Settings_Click" ToolTip="Настройки"/>
-                    <Button Content="—" Width="42" Click="Hide_Click" ToolTip="Скрыть"/>
+                    <Button Content="⌨" Width="42" Click="Hotkeys_Click" ToolTip="Hotkeys"/>
+                    <Button Content="⚙" Width="42" Click="Settings_Click" ToolTip="Settings"/>
+                    <Button Content="—" Width="42" Click="Hide_Click" ToolTip="Hide"/>
                 </StackPanel>
             </Grid>
 
             <TabControl Grid.Row="1" Margin="12,0,12,8" Foreground="{StaticResource Text}">
-                <TabItem Header="БУФЕР">
+                <TabItem Header="CLIPBOARD">
                     <Grid Margin="2,10,2,0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -43,8 +43,8 @@
 
                         <Grid Margin="2,0,2,7">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                            <TextBlock Text="Последние 25" Foreground="{StaticResource Text}" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                            <Button Grid.Column="1" Content="Очистить" Padding="10,6" Click="ClearHistory_Click" VerticalAlignment="Center"/>
+                            <TextBlock Text="Latest 25" Foreground="{StaticResource Text}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Content="Clear" Padding="10,6" Click="ClearHistory_Click" VerticalAlignment="Center"/>
                         </Grid>
 
                         <ListBox x:Name="HistoryList" Grid.Row="1" ItemsSource="{Binding History}"
@@ -87,7 +87,7 @@
                                             <TextBlock Grid.Column="1" Text="{Binding TimeText}" Foreground="{StaticResource Muted}" FontSize="10" Margin="10,0,0,0"/>
                                         </Grid>
                                         <Border x:Name="ActiveHint" Grid.Row="1" Visibility="Collapsed" Margin="0,8,0,0" Padding="8,5" Background="#3A326D" CornerRadius="7">
-                                            <TextBlock Text="✓ Активен   •   Ctrl+V — вставить   •   двойной клик — вставить сразу" Foreground="#E3E0FF" FontSize="10"/>
+                                            <TextBlock Text="✓ Active   •   Ctrl+V — paste   •   double-click — paste now" Foreground="#E3E0FF" FontSize="10"/>
                                         </Border>
                                     </Grid>
                                     <DataTemplate.Triggers>
@@ -105,15 +105,15 @@
                     </Grid>
                 </TabItem>
 
-                <TabItem Header="ШАБЛОНЫ">
+                <TabItem Header="TEMPLATES">
                     <Grid Margin="2,10,2,0">
                         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-                        <TextBlock x:Name="TemplateMouseHintText" Text="Меню шаблонов" Style="{StaticResource Hint}" Margin="2,0,2,8"/>
+                        <TextBlock x:Name="TemplateMouseHintText" Text="Template menu" Style="{StaticResource Hint}" Margin="2,0,2,8"/>
                         <Grid Grid.Row="1" Margin="2,0,2,8">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                             <ComboBox x:Name="FolderCombo" ItemsSource="{Binding TemplateFolders}" SelectionChanged="FolderCombo_SelectionChanged" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                            <Button Grid.Column="1" Content="＋ Новый" Background="{StaticResource Accent}" Click="NewTemplate_Click"/>
-                            <Button Grid.Column="2" Content="Папки" Click="ManageTemplates_Click"/>
+                            <Button Grid.Column="1" Content="＋ New" Background="{StaticResource Accent}" Click="NewTemplate_Click"/>
+                            <Button Grid.Column="2" Content="Folders" Click="ManageTemplates_Click"/>
                         </Grid>
                         <ListBox x:Name="TemplatesList" Grid.Row="2" MouseDoubleClick="TemplatesList_MouseDoubleClick">
                             <ListBox.ItemContainerStyle>
@@ -164,19 +164,19 @@
 
             <Border Grid.Row="2" Margin="14,0,14,8" Background="{StaticResource Panel}" CornerRadius="12" Padding="7">
                 <UniformGrid Columns="4">
-                    <Button Content="▶ Озвучить" Background="{StaticResource AccentSoft}" Click="Speak_Click"/>
-                    <Button Content="■ Стоп" Click="Stop_Click"/>
-                    <Button Content="🌐 Перевести" Click="Translate_Click"/>
-                    <Button Content="🌐 + ▶" Click="TranslateSpeak_Click" ToolTip="Перевести и озвучить"/>
+                    <Button Content="▶ Speak" Background="{StaticResource AccentSoft}" Click="Speak_Click"/>
+                    <Button Content="■ Stop" Click="Stop_Click"/>
+                    <Button Content="🌐 Translate" Click="Translate_Click"/>
+                    <Button Content="🌐 + ▶" Click="TranslateSpeak_Click" ToolTip="Translate and speak"/>
                 </UniformGrid>
             </Border>
 
             <Border Grid.Row="3" Background="#11141B" CornerRadius="0,0,18,18" Padding="14,0">
                 <Grid>
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <TextBlock x:Name="StatusText" Text="Готово" Foreground="{StaticResource Muted}" FontSize="10" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock x:Name="StatusText" Text="Ready" Foreground="{StaticResource Muted}" FontSize="10" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <Border Grid.Column="1" Background="#191E28" CornerRadius="8" Padding="8,4" VerticalAlignment="Center">
-                        <TextBlock x:Name="TtsStatusText" Text="TTS: проверка…" Foreground="#D6D9E2" FontSize="10" ToolTip="Состояние движков озвучки"/>
+                        <TextBlock x:Name="TtsStatusText" Text="TTS: checking…" Foreground="#D6D9E2" FontSize="10" ToolTip="Speech engine status"/>
                     </Border>
                 </Grid>
             </Border>

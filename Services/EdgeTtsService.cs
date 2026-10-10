@@ -55,7 +55,7 @@ public sealed class EdgeTtsService
             catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
             catch (Exception ex) { last = ex; }
         }
-        throw new InvalidOperationException("Edge Read Aloud не отвечает.", last);
+        throw new InvalidOperationException("Edge Read Aloud is not responding.", last);
     }
 
     public async Task<string> SynthesizeAsync(string text, AppSettings settings, string languageCode, CancellationToken ct = default)
@@ -74,8 +74,8 @@ public sealed class EdgeTtsService
     {
         var totalClock = Stopwatch.StartNew();
         text = CleanText(text);
-        if (string.IsNullOrWhiteSpace(text)) throw new InvalidOperationException("Нет текста для озвучки.");
-        if (text.Length > 100_000) throw new InvalidOperationException("Текст слишком большой для одной онлайн-озвучки. Выдели меньший фрагмент.");
+        if (string.IsNullOrWhiteSpace(text)) throw new InvalidOperationException("There is no text to read aloud.");
+        if (text.Length > 100_000) throw new InvalidOperationException("The text is too long for a single online speech request. Select a shorter passage.");
 
         var voiceClock = Stopwatch.StartNew();
         var voice = await SelectVoiceAsync(languageCode, settings, ct);
@@ -109,7 +109,7 @@ public sealed class EdgeTtsService
                 LogService.Info($"Edge TTS chunk complete: chunk={chunkNumber}/{chunks.Count}; chars={chunk.Length}; bytes={audio.Length}; elapsed_ms={chunkClock.ElapsedMilliseconds}");
             }
             await file.FlushAsync(ct);
-            if (file.Length < 128) throw new InvalidOperationException("Сервис озвучки не вернул аудио.");
+            if (file.Length < 128) throw new InvalidOperationException("The speech service returned no audio.");
             file.Close();
             File.Move(tempPath, path, true);
             _storage.PruneAudioCache(path);
@@ -144,7 +144,7 @@ public sealed class EdgeTtsService
                 last = ex;
             }
         }
-        throw new InvalidOperationException("Онлайн-озвучка Edge сейчас не отвечает. Проверь интернет и повтори попытку.", last);
+        throw new InvalidOperationException("Edge online speech is not responding. Check your internet connection and try again.", last);
     }
 
     private async Task<byte[]> SynthesizeChunkAsync(string text, string voice, int ratePercent, CancellationToken ct)
@@ -165,7 +165,7 @@ public sealed class EdgeTtsService
         var connectionId = Guid.NewGuid().ToString("N");
         var url = $"wss://{BaseUrl}/edge/v1?TrustedClientToken={TrustedClientToken}&ConnectionId={connectionId}&Sec-MS-GEC={GenerateSecMsGec()}&Sec-MS-GEC-Version={SecMsGecVersion}";
         try { await ws.ConnectAsync(new Uri(url), token); }
-        catch (OperationCanceledException) when (!ct.IsCancellationRequested) { throw new TimeoutException("Превышено время подключения к озвучке."); }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested) { throw new TimeoutException("The speech connection timed out."); }
 
         var stamp = DateToString();
         var config = $"X-Timestamp:{stamp}\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n" +
@@ -200,13 +200,13 @@ public sealed class EdgeTtsService
                     output.Write(payload, dataStart, payload.Length - dataStart);
             }
         }
-        catch (OperationCanceledException) when (!ct.IsCancellationRequested) { throw new TimeoutException("Сервис озвучки слишком долго не отвечал."); }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested) { throw new TimeoutException("The speech service took too long to respond."); }
 
         if (ws.State == WebSocketState.Open)
         {
             try { await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "done", CancellationToken.None); } catch { ws.Abort(); }
         }
-        if (output.Length == 0) throw new InvalidOperationException("Сервис озвучки не прислал аудио.");
+        if (output.Length == 0) throw new InvalidOperationException("The speech service did not send any audio.");
         return output.ToArray();
     }
 
@@ -275,7 +275,7 @@ public sealed class EdgeTtsService
                     var gender = v.TryGetProperty("Gender", out var ge) ? ge.GetString() : null;
                     if (!string.IsNullOrWhiteSpace(shortName) && !string.IsNullOrWhiteSpace(locale)) result.Add(new EdgeVoice(shortName!, locale!, gender ?? string.Empty));
                 }
-                if (result.Count == 0) throw new InvalidOperationException("Список голосов пуст.");
+                if (result.Count == 0) throw new InvalidOperationException("The voice list is empty.");
                 _voices = result;
                 try { await File.WriteAllTextAsync(_storage.VoiceCacheFile, JsonSerializer.Serialize(new VoiceCache { SavedUtc = DateTime.UtcNow, Voices = result }), ct); } catch { }
                 return result;
@@ -283,7 +283,7 @@ public sealed class EdgeTtsService
             catch (OperationCanceledException) { throw; }
             catch (Exception ex) { last = ex; }
         }
-        throw new InvalidOperationException("Не удалось получить список голосов.", last);
+        throw new InvalidOperationException("Could not retrieve the voice list.", last);
     }
 
     private async Task RefreshClockSkewAsync(CancellationToken ct)

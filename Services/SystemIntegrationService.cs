@@ -44,7 +44,7 @@ public sealed class SystemIntegrationService : IDisposable
         _source = new HwndSource(p);
         _source.AddHook(WndProc);
         if (!NativeMethods.AddClipboardFormatListener(_source.Handle))
-            throw new Win32Exception(Marshal.GetLastWin32Error(), "Windows не разрешила подписаться на изменения буфера обмена.");
+            throw new Win32Exception(Marshal.GetLastWin32Error(), "Windows did not allow subscribing to clipboard changes.");
 
         _mouseHookProc = MouseHookProc;
         try
@@ -73,7 +73,7 @@ public sealed class SystemIntegrationService : IDisposable
             if (!NativeMethods.RegisterHotKey(_source.Handle, id, modifiers | NativeMethods.MOD_NOREPEAT, virtualKey))
             {
                 var code = Marshal.GetLastWin32Error();
-                errors.Add(new HotkeyRegistrationError(pair.Key, pair.Value, code == 1409 ? "сочетание уже занято другой программой" : $"Windows отклонила сочетание (код {code})"));
+                errors.Add(new HotkeyRegistrationError(pair.Key, pair.Value, code == 1409 ? "Shortcut is already in use by another app" : $"Windows rejected the shortcut (code {code})"));
             }
             else
             {
@@ -338,7 +338,7 @@ public sealed class SystemIntegrationService : IDisposable
         var alt = IsDown(NativeMethods.VK_MENU);
         var win = IsDown(NativeMethods.VK_LWIN) || IsDown(NativeMethods.VK_RWIN);
 
-        // Match the configured gesture exactly so Ctrl+ПКМ does not also fire while
+        // Match the configured gesture exactly so Ctrl+right-click does not also fire while
         // Alt/Shift/Win are held for another application shortcut.
         var parts = (TemplateMouseGestureModifier ?? "Alt")
             .Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);

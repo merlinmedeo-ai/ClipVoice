@@ -30,9 +30,9 @@ public sealed class AppController : IDisposable
     private readonly GoogleTranslateTtsService _fallbackTts;
     private readonly PiperTtsService _localTts;
     private readonly object _ttsHealthLock = new();
-    private TtsProviderSnapshot _edgeHealth = new("edge", "Edge онлайн", TtsProviderState.Unknown, "Ещё не проверялся");
-    private TtsProviderSnapshot _googleHealth = new("google", "Google резерв", TtsProviderState.Unknown, "Ещё не проверялся");
-    private TtsProviderSnapshot _piperHealth = new("piper", "Piper локально", TtsProviderState.Unknown, "Ещё не проверялся");
+    private TtsProviderSnapshot _edgeHealth = new("edge", "Edge online", TtsProviderState.Unknown, "Not checked yet");
+    private TtsProviderSnapshot _googleHealth = new("google", "Google fallback", TtsProviderState.Unknown, "Not checked yet");
+    private TtsProviderSnapshot _piperHealth = new("piper", "Piper local", TtsProviderState.Unknown, "Not checked yet");
     private string _activeTtsProvider = "—";
     private long? _piperMemoryMb;
     private bool _piperVerified;
@@ -171,13 +171,13 @@ public sealed class AppController : IDisposable
 
     public async Task PrepareLocalTtsAsync(bool background = false, CancellationToken ct = default)
     {
-        UpdatePiperHealth(TtsProviderState.Preparing, "Готовлю офлайн-резерв RU / UK / EN…");
+        UpdatePiperHealth(TtsProviderState.Preparing, "Preparing the RU / UK / EN offline fallback…");
         try
         {
             await _localTts.PrepareCoreAsync(ct);
             _piperVerified = false;
             RefreshLocalTtsHealth();
-            if (!background) SetStatus("Piper и голоса установлены. Нажми «Проверить все, включая офлайн», чтобы выполнить реальный офлайн-тест.");
+            if (!background) SetStatus("Piper and its voices are installed. Click “Check all, including offline” to run a real offline test.");
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
         catch (Exception ex)
@@ -186,7 +186,7 @@ public sealed class AppController : IDisposable
             LogService.Write("Piper preparation failed", ex);
             if (!background)
             {
-                SetStatus("Не удалось подготовить локальный резерв: " + ShortTtsError(ex));
+                SetStatus("Could not prepare the offline fallback: " + ShortTtsError(ex));
                 throw;
             }
         }
@@ -211,11 +211,11 @@ public sealed class AppController : IDisposable
 
     private async Task CheckEdgeHealthAsync(CancellationToken ct)
     {
-        UpdateEdgeHealth(TtsProviderState.Checking, "Проверяю…");
+        UpdateEdgeHealth(TtsProviderState.Checking, "Checking…");
         try
         {
             await _tts.ProbeAsync(ct);
-            UpdateEdgeHealth(TtsProviderState.Ready, "Работает");
+            UpdateEdgeHealth(TtsProviderState.Ready, "Ready");
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
         catch (Exception ex)
@@ -227,11 +227,11 @@ public sealed class AppController : IDisposable
 
     private async Task CheckGoogleHealthAsync(CancellationToken ct)
     {
-        UpdateGoogleHealth(TtsProviderState.Checking, "Проверяю…");
+        UpdateGoogleHealth(TtsProviderState.Checking, "Checking…");
         try
         {
             await _fallbackTts.ProbeAsync(ct);
-            UpdateGoogleHealth(TtsProviderState.Ready, "Работает как онлайн-резерв");
+            UpdateGoogleHealth(TtsProviderState.Ready, "Ready as an online fallback");
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
         catch (Exception ex)
@@ -250,12 +250,12 @@ public sealed class AppController : IDisposable
             return;
         }
 
-        UpdatePiperHealth(TtsProviderState.Checking, "Реальный офлайн-тест: запускаю локальный синтез…");
+        UpdatePiperHealth(TtsProviderState.Checking, "Real offline test: starting local synthesis…");
         try
         {
             await _localTts.ProbeAsync(ct);
             _piperVerified = true;
-            UpdatePiperHealth(TtsProviderState.Ready, "Реальный офлайн-синтез работает • RU / UK / EN установлены");
+            UpdatePiperHealth(TtsProviderState.Ready, "Offline synthesis works • RU / UK / EN installed");
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
         catch (Exception ex)
@@ -319,34 +319,34 @@ public sealed class AppController : IDisposable
         if (_localTts.IsCoreReady)
         {
             if (_piperVerified)
-                UpdatePiperHealth(TtsProviderState.Ready, "Реальный офлайн-синтез работает • RU / UK / EN установлены");
+                UpdatePiperHealth(TtsProviderState.Ready, "Offline synthesis works • RU / UK / EN installed");
             else
-                UpdatePiperHealth(TtsProviderState.Installed, "RU / UK / EN установлены • реальный синтез ещё не проверен");
+                UpdatePiperHealth(TtsProviderState.Installed, "RU / UK / EN installed • synthesis not yet verified");
         }
         else if (_localTts.IsRuntimeReady || installed.Count > 0)
         {
-            var detail = installed.Count == 0 ? "Движок есть, голоса ещё не загружены" : "Частично готов: " + string.Join(", ", installed.Select(x => x.ToUpperInvariant()));
+            var detail = installed.Count == 0 ? "Runtime installed; voices not downloaded yet" : "Partially ready: " + string.Join(", ", installed.Select(x => x.ToUpperInvariant()));
             UpdatePiperHealth(TtsProviderState.Missing, detail);
         }
         else
-            UpdatePiperHealth(TtsProviderState.Missing, "Не подготовлен — можно скачать один раз");
+            UpdatePiperHealth(TtsProviderState.Missing, "Not prepared — download once to set it up");
     }
 
     private void UpdateEdgeHealth(TtsProviderState state, string detail)
     {
-        lock (_ttsHealthLock) _edgeHealth = new TtsProviderSnapshot("edge", "Edge онлайн", state, detail, DateTime.UtcNow);
+        lock (_ttsHealthLock) _edgeHealth = new TtsProviderSnapshot("edge", "Edge online", state, detail, DateTime.UtcNow);
         RaiseTtsHealthChanged();
     }
 
     private void UpdateGoogleHealth(TtsProviderState state, string detail)
     {
-        lock (_ttsHealthLock) _googleHealth = new TtsProviderSnapshot("google", "Google резерв", state, detail, DateTime.UtcNow);
+        lock (_ttsHealthLock) _googleHealth = new TtsProviderSnapshot("google", "Google fallback", state, detail, DateTime.UtcNow);
         RaiseTtsHealthChanged();
     }
 
     private void UpdatePiperHealth(TtsProviderState state, string detail)
     {
-        lock (_ttsHealthLock) _piperHealth = new TtsProviderSnapshot("piper", "Piper локально", state, detail, DateTime.UtcNow);
+        lock (_ttsHealthLock) _piperHealth = new TtsProviderSnapshot("piper", "Piper local", state, detail, DateTime.UtcNow);
         RaiseTtsHealthChanged();
     }
 
@@ -391,7 +391,7 @@ public sealed class AppController : IDisposable
     {
         var errors = _system.RegisterHotkeys(BuildHotkeyMap(Settings));
         LastHotkeyErrors = errors.Select(e => $"{DescribeAction(e.Action)} — {e.Hotkey}: {e.Reason}").ToList();
-        if (LastHotkeyErrors.Count > 0) SetStatus("Некоторые горячие клавиши не работают. Открой Настройки → Горячие клавиши.");
+        if (LastHotkeyErrors.Count > 0) SetStatus("Some hotkeys are unavailable. Open Settings → Hotkeys.");
         return LastHotkeyErrors;
     }
 
@@ -417,7 +417,7 @@ public sealed class AppController : IDisposable
         {
             if (string.IsNullOrWhiteSpace(pair.Value))
             {
-                if (!pair.Key.StartsWith(TemplatePrefix, StringComparison.Ordinal)) issues.Add($"{DescribeAction(pair.Key, folders)}: комбинация не задана.");
+                if (!pair.Key.StartsWith(TemplatePrefix, StringComparison.Ordinal)) issues.Add($"{DescribeAction(pair.Key, folders)}: no shortcut is assigned.");
                 continue;
             }
             if (!HotkeyParser.TryParse(pair.Value, out _, out _, out var normalized, out var error))
@@ -426,7 +426,7 @@ public sealed class AppController : IDisposable
                 continue;
             }
             if (seen.TryGetValue(normalized, out var other))
-                issues.Add($"{DescribeAction(pair.Key, folders)} и {DescribeAction(other, folders)} используют одинаковое сочетание {normalized}.");
+                issues.Add($"{DescribeAction(pair.Key, folders)} and {DescribeAction(other, folders)} use the same shortcut {normalized}.");
             else seen[normalized] = pair.Key;
         }
         return issues;
@@ -434,14 +434,14 @@ public sealed class AppController : IDisposable
 
     private string DescribeAction(string action, IEnumerable<TemplateFolder>? folders = null)
     {
-        if (action == ActionPanel) return "Открыть панель";
-        if (action == ActionSpeak) return "Озвучить";
-        if (action == ActionTranslate) return "Перевести";
-        if (action == ActionTranslateSpeak) return "Перевести и озвучить";
+        if (action == ActionPanel) return "Open panel";
+        if (action == ActionSpeak) return "Read aloud";
+        if (action == ActionTranslate) return "Translate";
+        if (action == ActionTranslateSpeak) return "Translate and speak";
         if (action.StartsWith(TemplatePrefix, StringComparison.Ordinal) && Guid.TryParseExact(action[TemplatePrefix.Length..], "N", out var id))
         {
             var t = (folders ?? TemplateFolders).SelectMany(f => f.Templates).FirstOrDefault(x => x.Id == id);
-            if (t is not null) return $"Шаблон «{t.Name}»";
+            if (t is not null) return $"Template “{t.Name}”";
         }
         return action;
     }
@@ -521,13 +521,13 @@ public sealed class AppController : IDisposable
                 ActiveHistoryItemId = null;
                 ActiveTemplateId = null;
                 ActiveSelectionChanged?.Invoke();
-                SetStatus("Текст скопирован, но слишком большой для истории ClipVoice.");
+                SetStatus("The copied text is too large for ClipVoice history.");
                 return;
             }
             AddHistoryItem(item);
-            SetStatus(item.Kind == ClipboardItemKind.Text ? "Текст добавлен в историю" : "Файлы добавлены в историю");
+            SetStatus(item.Kind == ClipboardItemKind.Text ? "Text added to history" : "Files added to history");
         }
-        catch (Exception ex) { SetStatus("Буфер временно недоступен: " + ex.Message); }
+        catch (Exception ex) { SetStatus("Clipboard is temporarily unavailable: " + ex.Message); }
     }
 
     public void SyncClipboardFromSystem(bool addToHistory = true)
@@ -610,9 +610,9 @@ public sealed class AppController : IDisposable
             else ClipboardService.SetFiles(item.Files);
             MarkOwnClipboardWrite();
             SetActiveHistory(item);
-            SetStatus("Активный элемент выбран. Ctrl+V вставит именно его.");
+            SetStatus("The item is selected. Ctrl+V will paste it.");
         }
-        catch (Exception ex) { SetStatus("Ошибка буфера: " + ex.Message); }
+        catch (Exception ex) { SetStatus("Clipboard error: " + ex.Message); }
     }
 
     public async Task PasteClipboardItemAsync(ClipboardItem item)
@@ -630,7 +630,7 @@ public sealed class AppController : IDisposable
     {
         if (!target.IsValid)
         {
-            SetStatus($"Не вижу поле для вставки шаблона «{template.Name}».");
+            SetStatus($"Could not find a field for inserting template “{template.Name}”.");
             return;
         }
 
@@ -641,14 +641,14 @@ public sealed class AppController : IDisposable
                 ? await PasteTemplateThroughClipboardAsync(target, template.Content ?? string.Empty)
                 : await _system.SendUnicodeTextAsync(target, template.Content ?? string.Empty);
             SetStatus(ok
-                ? $"Вставлен шаблон «{template.Name}» • буфер обмена не изменён"
-                : $"Не удалось вставить шаблон «{template.Name}». Отпусти Alt/Ctrl/Shift и проверь, что ClipVoice и целевая программа запущены с одинаковыми правами.");
+                ? $"Inserted template “{template.Name}” • clipboard unchanged"
+                : $"Could not insert template “{template.Name}”. Release Alt/Ctrl/Shift and check that ClipVoice and the target app run at the same privilege level.");
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)
         {
             LogService.Write("Template insertion failed", ex);
-            SetStatus("Не удалось вставить шаблон: " + ex.Message);
+            SetStatus("Could not insert the template: " + ex.Message);
         }
     }
 
@@ -694,12 +694,12 @@ public sealed class AppController : IDisposable
     {
         if (_lastTargetWindow == IntPtr.Zero)
         {
-            SetStatus("Элемент уже в буфере. Вернись в нужное окно и нажми Ctrl+V.");
+            SetStatus("The item is on the clipboard. Return to the target window and press Ctrl+V.");
             return;
         }
         if (Settings.HidePanelAfterPaste) _main?.Hide();
         var ok = await _system.SendPasteShortcutAsync(_lastTargetWindow);
-        SetStatus(ok ? "Вставлено" : "Элемент в буфере. Если приложение запущено от администратора, нажми Ctrl+V вручную.");
+        SetStatus(ok ? "Pasted" : "The item is on the clipboard. If the target app is running as administrator, press Ctrl+V manually.");
     }
 
     public string GetCurrentText() => ClipboardService.ReadText();
@@ -730,7 +730,7 @@ public sealed class AppController : IDisposable
         LogService.Info($"Selection capture started: route=template-popup; target={_system.DescribeInputTarget(target)}");
         if (!target.IsValid)
         {
-            if (reportErrors) SetStatus("Не вижу поле, из которого нужно взять выделенный текст.");
+            if (reportErrors) SetStatus("Could not find a field to capture the selected text from.");
             return null;
         }
 
@@ -748,7 +748,7 @@ public sealed class AppController : IDisposable
         var hadAnyClipboardData = ClipboardService.HasAnyData();
         if (previous is null && hadAnyClipboardData)
         {
-            if (reportErrors) SetStatus("Не могу безопасно взять выделение: в буфере сейчас неподдерживаемые данные (например изображение). Скопируй любой текст или очисти буфер и повтори.");
+            if (reportErrors) SetStatus("Cannot safely capture the selection: the clipboard currently contains unsupported data (such as an image). Copy some text or clear the clipboard and try again.");
             return null;
         }
 
@@ -761,7 +761,7 @@ public sealed class AppController : IDisposable
             if (!await _system.SendCopyShortcutAsync(target, ct))
             {
                 LogService.Info($"Selection copy shortcut failed: elapsed_ms={shortcutClock.ElapsedMilliseconds}");
-                if (reportErrors) SetStatus("Не удалось скопировать выделенный текст. Проверь, что текст действительно выделен.");
+                if (reportErrors) SetStatus("Could not copy the selected text. Check that some text is selected.");
                 return null;
             }
 
@@ -790,7 +790,7 @@ public sealed class AppController : IDisposable
             if (string.IsNullOrWhiteSpace(selected))
             {
                 LogService.Info($"Selection capture empty: elapsed_ms={captureClock.ElapsedMilliseconds}");
-                if (reportErrors) SetStatus("Выделенный текст не найден. Выдели текст и снова открой меню шаблонов.");
+                if (reportErrors) SetStatus("No selected text was found. Select text and reopen the template menu.");
                 return null;
             }
             return selected;
@@ -842,11 +842,11 @@ public sealed class AppController : IDisposable
         CancelWork();
         _workCts = new CancellationTokenSource();
         try { await SpeakTextAsync(text, _workCts.Token); }
-        catch (OperationCanceledException) { SetStatus("Остановлено"); }
+        catch (OperationCanceledException) { SetStatus("Stopped"); }
         catch (Exception ex)
         {
             LogService.Write("Selected text speech failed", ex);
-            SetStatus("Ошибка озвучки: " + FriendlyOnlineError(ex));
+            SetStatus("Speech error: " + FriendlyOnlineError(ex));
         }
     }
 
@@ -864,16 +864,16 @@ public sealed class AppController : IDisposable
             var targetLanguage = TranslationDirectionService.ResolveTargetLanguage(
                 detectedLanguage, Settings.PreferredCyrillicTranslationLanguage);
             var sourceName = string.IsNullOrWhiteSpace(detectedLanguage)
-                ? "иностранный текст"
+                ? "Foreign text"
                 : TranslationDirectionService.DisplayName(detectedLanguage);
             var targetName = TranslationDirectionService.DisplayName(targetLanguage);
-            SetStatus($"{sourceName} → {targetName} • перевожу…");
+            SetStatus($"{sourceName} → {targetName} • translating…");
 
             var translateClock = Stopwatch.StartNew();
             var result = await _translation.TranslateDetailedAsync(text, targetLanguage, ct);
             LogService.Info($"Translation complete: source={detectedLanguage}; target={targetLanguage}; input_chars={text.Length}; output_chars={result.Text?.Length ?? 0}; elapsed_ms={translateClock.ElapsedMilliseconds}");
             if (string.IsNullOrWhiteSpace(result.Text))
-                throw new InvalidOperationException("Переводчик вернул пустой текст.");
+                throw new InvalidOperationException("The translator returned empty text.");
 
             detectedLanguage = string.IsNullOrWhiteSpace(result.DetectedLanguage)
                 ? detectedLanguage
@@ -883,29 +883,29 @@ public sealed class AppController : IDisposable
             MarkOwnClipboardWrite();
             AddTextToHistory(result.Text);
 
-            SetStatus($"{sourceName} → {targetName} • переведено, озвучиваю…");
+            SetStatus($"{sourceName} → {targetName} • translated, reading aloud…");
             await SpeakTextAsync(result.Text, ct, targetLanguage);
-            SetStatus($"{sourceName} → {targetName} • перевод озвучен");
+            SetStatus($"{sourceName} → {targetName} • translation read aloud");
         }
-        catch (OperationCanceledException) { SetStatus("Остановлено"); }
+        catch (OperationCanceledException) { SetStatus("Stopped"); }
         catch (Exception ex)
         {
             LogService.Write("Selected text translate-and-speak failed", ex);
-            SetStatus("Ошибка перевода или озвучки: " + FriendlyOnlineError(ex));
+            SetStatus("Translation or speech error: " + FriendlyOnlineError(ex));
         }
     }
 
     public TextTemplate AddTemplateFromSelection(string content, string templateName, Guid? folderId, string? newFolderName)
     {
-        if (string.IsNullOrWhiteSpace(content)) throw new ArgumentException("Текст шаблона пуст.", nameof(content));
-        if (string.IsNullOrWhiteSpace(templateName)) throw new ArgumentException("Название шаблона пустое.", nameof(templateName));
+        if (string.IsNullOrWhiteSpace(content)) throw new ArgumentException("Template text is empty.", nameof(content));
+        if (string.IsNullOrWhiteSpace(templateName)) throw new ArgumentException("Template name is empty.", nameof(templateName));
 
         TemplateFolder? folder = null;
         if (folderId is Guid id) folder = TemplateFolders.FirstOrDefault(x => x.Id == id);
 
         if (folder is null)
         {
-            var requestedName = string.IsNullOrWhiteSpace(newFolderName) ? "Мои шаблоны" : newFolderName.Trim();
+            var requestedName = string.IsNullOrWhiteSpace(newFolderName) ? "My templates" : newFolderName.Trim();
             folder = TemplateFolders.FirstOrDefault(x => string.Equals(x.Name, requestedName, StringComparison.OrdinalIgnoreCase));
             if (folder is null)
             {
@@ -923,7 +923,7 @@ public sealed class AppController : IDisposable
             IsSecret = false
         };
         folder.Templates.Add(template);
-        SetStatus($"Создан шаблон «{template.Name}» в папке «{folder.Name}».");
+        SetStatus($"Created template “{template.Name}” in folder “{folder.Name}”.");
         return template;
     }
 
@@ -1067,17 +1067,17 @@ public sealed class AppController : IDisposable
             if (string.IsNullOrWhiteSpace(text))
             {
                 SetStatus(captureSelection && Settings.AutoCaptureSelection
-                    ? "Не удалось получить выделенный текст. Оставь фрагмент выделенным и попробуй ещё раз."
-                    : "Нет текста. Выдели текст или скопируй его в буфер.");
+                    ? "Could not retrieve the selected text. Keep it selected and try again."
+                    : "There is no text. Select some text or copy it to the clipboard.");
                 return;
             }
             await SpeakTextAsync(text, _workCts.Token);
         }
-        catch (OperationCanceledException) { SetStatus("Остановлено"); }
+        catch (OperationCanceledException) { SetStatus("Stopped"); }
         catch (Exception ex)
         {
             LogService.Write("Speech action failed", ex);
-            SetStatus("Ошибка озвучки: " + FriendlyOnlineError(ex));
+            SetStatus("Speech error: " + FriendlyOnlineError(ex));
         }
     }
 
@@ -1085,7 +1085,7 @@ public sealed class AppController : IDisposable
     {
         var requestClock = Stopwatch.StartNew();
         LogTextInput("tts-request", text);
-        SetStatus("Готовлю озвучку…");
+        SetStatus("Preparing speech…");
         var languageClock = Stopwatch.StartNew();
         var language = string.IsNullOrWhiteSpace(knownLanguage)
             ? _translation.DetectLanguageLocally(text)
@@ -1116,15 +1116,15 @@ public sealed class AppController : IDisposable
 
         if (file is null && !preferFastOnline)
         {
-            UpdateEdgeHealth(TtsProviderState.Checking, "Озвучиваю…");
+            UpdateEdgeHealth(TtsProviderState.Checking, "Generating speech…");
             try
             {
                 var synthClock = Stopwatch.StartNew();
                 LogService.Info($"TTS synthesis started: provider=Edge; language={language}; chars={text.Length}; rate_percent={Settings.SpeechRatePercent}");
                 file = await _tts.SynthesizeAsync(text, Settings, language, ct);
-                provider = "Edge онлайн";
+                provider = "Edge online";
                 LogSynthesizedAudio("Edge", file, synthClock);
-                UpdateEdgeHealth(TtsProviderState.Ready, "Работает");
+                UpdateEdgeHealth(TtsProviderState.Ready, "Ready");
             }
             catch (OperationCanceledException) { throw; }
             catch (Exception ex)
@@ -1137,16 +1137,16 @@ public sealed class AppController : IDisposable
 
         if (file is null && !preferFastOnline)
         {
-            SetStatus("Edge недоступен — пробую резервную онлайн-озвучку…");
-            UpdateGoogleHealth(TtsProviderState.Checking, "Озвучиваю…");
+            SetStatus("Edge is unavailable — trying online speech fallback…");
+            UpdateGoogleHealth(TtsProviderState.Checking, "Generating speech…");
             try
             {
                 var synthClock = Stopwatch.StartNew();
                 LogService.Info($"TTS synthesis started: provider=Google; language={language}; chars={text.Length}; rate_percent={Settings.SpeechRatePercent}");
                 file = await _fallbackTts.SynthesizeAsync(text, language, Settings.SpeechRatePercent, ct);
-                provider = "Google резерв";
+                provider = "Google fallback";
                 LogSynthesizedAudio("Google", file, synthClock);
-                UpdateGoogleHealth(TtsProviderState.Ready, "Работает как онлайн-резерв");
+                UpdateGoogleHealth(TtsProviderState.Ready, "Ready as an online fallback");
             }
             catch (OperationCanceledException) { throw; }
             catch (Exception ex)
@@ -1159,9 +1159,9 @@ public sealed class AppController : IDisposable
 
         if (file is null)
         {
-            SetStatus("Онлайн-озвучка недоступна — переключаюсь на локальный Piper…");
+            SetStatus("Online speech is unavailable — switching to local Piper…");
             UpdatePiperHealth(_localTts.IsRuntimeReady ? TtsProviderState.Checking : TtsProviderState.Preparing,
-                _localTts.IsRuntimeReady ? "Озвучиваю локально…" : "Подготавливаю локальный резерв…");
+                _localTts.IsRuntimeReady ? "Generating speech offline…" : "Preparing the offline fallback…");
             try
             {
                 var synthClock = Stopwatch.StartNew();
@@ -1169,10 +1169,10 @@ public sealed class AppController : IDisposable
                 // Free managed memory before starting the short-lived neural process.
                 GC.Collect(1, GCCollectionMode.Optimized, blocking: false, compacting: false);
                 file = await _localTts.SynthesizeAsync(text, language, Settings.SpeechRatePercent, ct);
-                provider = "Piper локально";
+                provider = "Piper local";
                 LogSynthesizedAudio("Piper", file, synthClock);
                 _piperVerified = true;
-                UpdatePiperHealth(TtsProviderState.Ready, $"Реальный офлайн-синтез работает • {language.ToUpperInvariant()}");
+                UpdatePiperHealth(TtsProviderState.Ready, $"Offline synthesis works • {language.ToUpperInvariant()}");
             }
             catch (OperationCanceledException) { throw; }
             catch (Exception ex)
@@ -1191,16 +1191,16 @@ public sealed class AppController : IDisposable
                 googleError is null ? null : "Google: " + ShortTtsError(googleError),
                 piperError is null ? null : "Piper: " + ShortTtsError(piperError)
             }.Where(x => x is not null);
-            throw new InvalidOperationException("Все движки озвучки недоступны. " + string.Join(" • ", parts));
+            throw new InvalidOperationException("All speech engines are unavailable. " + string.Join(" • ", parts));
         }
 
-        if (!string.Equals(provider, "Piper локально", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(provider, "Piper local", StringComparison.OrdinalIgnoreCase))
             QueueLocalVoicePreparation(language);
         LogService.Info($"TTS synthesis complete: provider={provider}; elapsed_ms={requestClock.ElapsedMilliseconds}; rate_percent={Settings.SpeechRatePercent}");
         LogService.Info($"TTS playback requested: provider={provider}; synth_elapsed_ms={requestClock.ElapsedMilliseconds}");
         _audio.Play(file, provider, text, Settings.SpeechRatePercent);
         SetActiveTtsProvider(provider);
-        SetStatus($"Озвучивание • {provider} • {language.ToUpperInvariant()}");
+        SetStatus($"Speaking • {provider} • {language.ToUpperInvariant()}");
     }
 
     private async Task SpeakLongTextStreamingAsync(string text, string language, Stopwatch requestClock, CancellationToken ct)
@@ -1239,7 +1239,7 @@ public sealed class AppController : IDisposable
             {
                 if (played == 0) firstProvider = part.Provider;
                 played++;
-                SetStatus($"Озвучивание по частям • {played}/{parts.Count}");
+                SetStatus($"Speaking in parts • {played}/{parts.Count}");
                 LogService.Info($"TTS streaming playback started: part={part.Index}/{parts.Count}; provider={part.Provider}");
                 await _audio.PlayAndWaitAsync(part.Path, part.Provider, part.Text, Settings.SpeechRatePercent, ct);
                 LogService.Info($"TTS streaming playback completed: part={part.Index}/{parts.Count}");
@@ -1252,9 +1252,9 @@ public sealed class AppController : IDisposable
             throw;
         }
 
-        SetActiveTtsProvider(string.IsNullOrWhiteSpace(firstProvider) ? "—" : firstProvider + " (частями)");
+        SetActiveTtsProvider(string.IsNullOrWhiteSpace(firstProvider) ? "—" : firstProvider + " (streaming)");
         LogService.Info($"TTS streaming complete: played_parts={played}/{parts.Count}; elapsed_ms={requestClock.ElapsedMilliseconds}");
-        SetStatus($"Озвучивание завершено • {firstProvider} • {language.ToUpperInvariant()}");
+        SetStatus($"Speech complete • {firstProvider} • {language.ToUpperInvariant()}");
     }
 
     private async Task<(string Path, string Provider)> SynthesizeSpeechPartAsync(string text, string language, CancellationToken ct)
@@ -1268,8 +1268,8 @@ public sealed class AppController : IDisposable
             LogService.Info($"TTS streaming using Piper fallback: chars={text.Length}");
             var path = await _localTts.SynthesizeAsync(text, language, Settings.SpeechRatePercent, ct);
             _piperVerified = true;
-            UpdatePiperHealth(TtsProviderState.Ready, $"Реальный офлайн-синтез работает • {language.ToUpperInvariant()}");
-            return (path, "Piper локально");
+            UpdatePiperHealth(TtsProviderState.Ready, $"Offline synthesis works • {language.ToUpperInvariant()}");
+            return (path, "Piper local");
         }
         catch (OperationCanceledException) { throw; }
         catch (Exception ex)
@@ -1285,7 +1285,7 @@ public sealed class AppController : IDisposable
             fastest.GoogleError is null ? null : "Google: " + ShortTtsError(fastest.GoogleError),
             piperError is null ? null : "Piper: " + ShortTtsError(piperError)
         }.Where(x => x is not null);
-        throw new InvalidOperationException("Не удалось озвучить фрагмент. " + string.Join(" • ", errors));
+        throw new InvalidOperationException("Could not read the text passage aloud. " + string.Join(" • ", errors));
     }
 
     private static List<string> SplitIntoSpeechParts(string text, int maxChars)
@@ -1330,7 +1330,7 @@ public sealed class AppController : IDisposable
     public async Task<string> DiagnoseTtsSpeechSpeedAsync(CancellationToken ct = default)
     {
         using var operation = LogService.BeginOperation("tts-speed-diagnostic", "settings");
-        const string sample = "Это проверочная фраза для измерения скорости синтеза речи. ClipVoice читает один и тот же русский текст одинаковыми настройками в каждом движке. После проверки можно сравнить длительность готового аудио и примерное количество произнесённых слов в минуту. Эта фраза нужна только для теста.";
+        const string sample = "This is a sample sentence for measuring speech synthesis speed. ClipVoice reads the same English text with identical settings in each engine. Compare the generated audio duration and the estimated number of words spoken per minute. This sentence is used only for testing.";
         var words = sample.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).Length;
         var rate = Math.Clamp(Settings.SpeechRatePercent, -50, 100);
         var ratesToTest = rate == 0 ? new[] { 0 } : new[] { 0, rate };
@@ -1340,32 +1340,32 @@ public sealed class AppController : IDisposable
         foreach (var testRate in ratesToTest)
         {
             ct.ThrowIfCancellationRequested();
-            results.Add($"Скорость {testRate}%:");
+            results.Add($"Speed {testRate}%:");
             LogService.Info($"TTS speed diagnostic rate started: rate_setting_percent={testRate}");
 
             var edgeSettings = new AppSettings
             {
                 SpeechRatePercent = testRate,
-                RussianVoice = Settings.RussianVoice
+                EnglishVoice = Settings.EnglishVoice
             };
             results.Add(await MeasureProviderSpeedAsync("Edge", "ssml_rate", $"{(testRate >= 0 ? "+" : string.Empty)}{testRate}%", sample,
-                token => _tts.SynthesizeAsync(sample, edgeSettings, "ru", token), words, testRate, ct) ?? "Edge: ошибка — подробности в логе отказов");
+                token => _tts.SynthesizeAsync(sample, edgeSettings, "en", token), words, testRate, ct) ?? "Edge: failed — see error log for details");
             results.Add(await MeasureProviderSpeedAsync("Google", "ttsspeed", (1.0 + testRate / 100.0).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), sample,
-                token => _fallbackTts.SynthesizeAsync(sample, "ru", testRate, token), words, testRate, ct) ?? "Google: ошибка — подробности в логе отказов");
+                token => _fallbackTts.SynthesizeAsync(sample, "en", testRate, token), words, testRate, ct) ?? "Google: failed — see error log for details");
             if (_localTts.IsCoreReady)
             {
                 results.Add(await MeasureProviderSpeedAsync("Piper", "length_scale", (1.0 / Math.Clamp(1.0 + testRate / 100.0, 0.5, 2.0)).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture), sample,
-                    token => _localTts.SynthesizeAsync(sample, "ru", testRate, token), words, testRate, ct) ?? "Piper: ошибка — подробности в логе отказов");
+                    token => _localTts.SynthesizeAsync(sample, "en", testRate, token), words, testRate, ct) ?? "Piper: failed — see error log for details");
             }
             else
             {
-                results.Add("Piper: пропущен — движок не подготовлен");
-                LogService.Info($"TTS speed diagnostic skipped: provider=Piper локально; rate_setting_percent={testRate}; reason=runtime_or_Russian_voice_not_prepared");
+                results.Add("Piper: skipped — runtime is not prepared");
+                LogService.Info($"TTS speed diagnostic skipped: provider=Piper local; rate_setting_percent={testRate}; reason=runtime_or_English_voice_not_prepared");
             }
         }
 
         LogService.Info($"TTS speed diagnostic finished");
-        SetStatus("Сравнение скорости завершено");
+        SetStatus("Speed comparison completed");
         return string.Join(Environment.NewLine, results);
     }
 
@@ -1382,7 +1382,7 @@ public sealed class AppController : IDisposable
             var duration = await AudioPlaybackService.MeasureDurationAsync(path, timeout.Token);
             var wpm = duration.TotalSeconds > 0 ? words * 60d / duration.TotalSeconds : 0;
             LogService.Info($"TTS speed diagnostic result: provider={provider}; chars={sample.Length}; words={words}; rate_setting_percent={ratePercent}; rate_parameter={rateParameter}; rate_value={rateValue}; audio_duration_ms={duration.TotalMilliseconds:F0}; estimated_audio_wpm={wpm:F1}; synthesis_and_measurement_ms={clock.ElapsedMilliseconds}");
-            return $"{provider}: {wpm:F0} слов/мин ({duration.TotalSeconds:F1} с)";
+            return $"{provider}: {wpm:F0} words/min ({duration.TotalSeconds:F1} s)";
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
         catch (Exception ex)
@@ -1396,15 +1396,15 @@ public sealed class AppController : IDisposable
         SynthesizeFastestOnlineAsync(string text, string language, CancellationToken ct)
     {
         using var raceCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        UpdateEdgeHealth(TtsProviderState.Checking, "Готовлю параллельно…");
-        UpdateGoogleHealth(TtsProviderState.Checking, "Готовлю параллельно…");
+        UpdateEdgeHealth(TtsProviderState.Checking, "Starting in parallel…");
+        UpdateGoogleHealth(TtsProviderState.Checking, "Starting in parallel…");
 
         var edgeTask = _tts.SynthesizeAsync(text, Settings, language, raceCts.Token);
         var googleTask = _fallbackTts.SynthesizeAsync(text, language, Settings.SpeechRatePercent, raceCts.Token);
         var pending = new Dictionary<Task<string>, string>
         {
-            [edgeTask] = "Edge онлайн",
-            [googleTask] = "Google резерв"
+            [edgeTask] = "Edge online",
+            [googleTask] = "Google fallback"
         };
         Exception? edgeError = null;
         Exception? googleError = null;
@@ -1420,8 +1420,8 @@ public sealed class AppController : IDisposable
             {
                 var path = await completed;
                 raceCts.Cancel();
-                if (completedProvider == "Edge онлайн") UpdateEdgeHealth(TtsProviderState.Ready, "Работает");
-                else UpdateGoogleHealth(TtsProviderState.Ready, "Работает как онлайн-резерв");
+                if (completedProvider == "Edge online") UpdateEdgeHealth(TtsProviderState.Ready, "Ready");
+                else UpdateGoogleHealth(TtsProviderState.Ready, "Ready as an online fallback");
 
                 // Observe cancellation/errors from the slower request without making
                 // the user wait for it before playback begins.
@@ -1436,7 +1436,7 @@ public sealed class AppController : IDisposable
             }
             catch (Exception ex)
             {
-                if (completedProvider == "Edge онлайн")
+                if (completedProvider == "Edge online")
                 {
                     edgeError = ex;
                     UpdateEdgeHealth(TtsProviderState.Failed, ShortTtsError(ex));
@@ -1460,17 +1460,17 @@ public sealed class AppController : IDisposable
         try
         {
             await task;
-            if (provider == "Edge онлайн") UpdateEdgeHealth(TtsProviderState.Ready, "Работает");
-            else UpdateGoogleHealth(TtsProviderState.Ready, "Работает как онлайн-резерв");
+            if (provider == "Edge online") UpdateEdgeHealth(TtsProviderState.Ready, "Ready");
+            else UpdateGoogleHealth(TtsProviderState.Ready, "Ready as an online fallback");
         }
         catch (OperationCanceledException)
         {
-            if (provider == "Edge онлайн") UpdateEdgeHealth(TtsProviderState.Unknown, "Запрос отменён после запуска более быстрого движка");
-            else UpdateGoogleHealth(TtsProviderState.Unknown, "Запрос отменён после запуска более быстрого движка");
+            if (provider == "Edge online") UpdateEdgeHealth(TtsProviderState.Unknown, "Request cancelled after a faster engine started");
+            else UpdateGoogleHealth(TtsProviderState.Unknown, "Request cancelled after a faster engine started");
         }
         catch (Exception ex)
         {
-            if (provider == "Edge онлайн") UpdateEdgeHealth(TtsProviderState.Failed, ShortTtsError(ex));
+            if (provider == "Edge online") UpdateEdgeHealth(TtsProviderState.Failed, ShortTtsError(ex));
             else UpdateGoogleHealth(TtsProviderState.Failed, ShortTtsError(ex));
         }
     }
@@ -1486,8 +1486,8 @@ public sealed class AppController : IDisposable
             if (string.IsNullOrWhiteSpace(text))
             {
                 SetStatus(captureSelection && Settings.AutoCaptureSelection
-                    ? "Не удалось получить выделенный текст. Оставь фрагмент выделенным и попробуй ещё раз."
-                    : "Нет текста. Выдели текст или скопируй его в буфер.");
+                    ? "Could not retrieve the selected text. Keep it selected and try again."
+                    : "There is no text. Select some text or copy it to the clipboard.");
                 return;
             }
 
@@ -1496,10 +1496,10 @@ public sealed class AppController : IDisposable
                 detectedLanguage, Settings.PreferredCyrillicTranslationLanguage);
 
             var sourceName = string.IsNullOrWhiteSpace(detectedLanguage)
-                ? "иностранный текст"
+                ? "Foreign text"
                 : TranslationDirectionService.DisplayName(detectedLanguage);
             var targetName = TranslationDirectionService.DisplayName(targetLanguage);
-            SetStatus($"{sourceName} → {targetName} • перевожу…");
+            SetStatus($"{sourceName} → {targetName} • translating…");
 
             var translateClock = Stopwatch.StartNew();
             var result = await _translation.TranslateDetailedAsync(text, targetLanguage, _workCts.Token);
@@ -1512,33 +1512,33 @@ public sealed class AppController : IDisposable
 
             var translated = result.Text;
             if (string.IsNullOrWhiteSpace(translated))
-                throw new InvalidOperationException("Переводчик вернул пустой текст.");
+                throw new InvalidOperationException("The translator returned empty text.");
             ClipboardService.SetText(translated);
             MarkOwnClipboardWrite();
             AddTextToHistory(translated);
 
             if (speakAfter)
             {
-                SetStatus($"{sourceName} → {targetName} • перевод готов, получаю озвучку…");
+                SetStatus($"{sourceName} → {targetName} • translation ready, generating speech…");
                 await SpeakTextAsync(translated, _workCts.Token, targetLanguage);
-                SetStatus($"{sourceName} → {targetName} • озвучивается • готово для Ctrl+V");
+                SetStatus($"{sourceName} → {targetName} • speaking • ready for Ctrl+V");
             }
             else
             {
-                SetStatus($"{sourceName} → {targetName} • готово для Ctrl+V");
+                SetStatus($"{sourceName} → {targetName} • ready for Ctrl+V");
             }
         }
-        catch (OperationCanceledException) { SetStatus("Остановлено"); }
+        catch (OperationCanceledException) { SetStatus("Stopped"); }
         catch (Exception ex)
         {
             LogService.Write("Translation failed", ex);
-            SetStatus("Ошибка перевода: " + FriendlyOnlineError(ex));
+            SetStatus("Translation error: " + FriendlyOnlineError(ex));
         }
     }
 
     private static string FriendlyOnlineError(Exception ex)
     {
-        if (ex is HttpRequestException) return "нет соединения с онлайн-сервисом. Проверь интернет.";
+        if (ex is HttpRequestException) return "Cannot connect to the online service. Check your internet connection.";
         return ex.Message;
     }
 
@@ -1546,7 +1546,7 @@ public sealed class AppController : IDisposable
     {
         CancelWork();
         _audio.Stop();
-        SetStatus("Остановлено");
+        SetStatus("Stopped");
     }
 
     private void CancelWork()
@@ -1564,7 +1564,7 @@ public sealed class AppController : IDisposable
         // Clearing ClipVoice history must not pretend that the Windows clipboard itself is empty.
         // Keep the current clipboard as the first item, if it contains supported data.
         SyncClipboardFromSystem(addToHistory: true);
-        SetStatus(History.Count > 0 ? "История очищена • текущий буфер оставлен" : "История очищена");
+        SetStatus(History.Count > 0 ? "History cleared • current clipboard item retained" : "History cleared");
     }
 
     private void SetActiveHistory(ClipboardItem item)
@@ -1614,7 +1614,7 @@ public sealed class AppController : IDisposable
     public void ToggleClipboardMonitoring()
     {
         _monitoring = !_monitoring;
-        SetStatus(_monitoring ? "Отслеживание буфера включено" : "Отслеживание буфера приостановлено");
+        SetStatus(_monitoring ? "Clipboard monitoring enabled" : "Clipboard monitoring paused");
     }
 
     public void ReplaceTemplateFolders(IEnumerable<TemplateFolder> folders)
@@ -1638,7 +1638,7 @@ public sealed class AppController : IDisposable
         }
         if (TemplateFolders.Count == 0)
         {
-            var folder = new TemplateFolder { Name = "Мои шаблоны" };
+            var folder = new TemplateFolder { Name = "My templates" };
             folder.Templates.CollectionChanged += TemplatesChanged;
             TemplateFolders.Add(folder);
         }
@@ -1672,7 +1672,7 @@ public sealed class AppController : IDisposable
         }
         while (History.Count > Settings.HistoryLimit) History.RemoveAt(History.Count - 1);
         SaveState();
-        SetStatus(registration.Count == 0 ? "Настройки сохранены" : "Настройки сохранены, но есть конфликт горячих клавиш");
+        SetStatus(registration.Count == 0 ? "Settings saved" : "Settings saved, but there is a hotkey conflict");
         return registration;
     }
 
@@ -1706,7 +1706,7 @@ public sealed class AppController : IDisposable
         catch (Exception ex)
         {
             LogService.Write("Could not configure Windows startup", ex);
-            SetStatus("Не удалось настроить автозапуск: " + ex.Message);
+            SetStatus("Could not configure startup: " + ex.Message);
         }
     }
 
@@ -1728,7 +1728,7 @@ public sealed class AppController : IDisposable
         catch (Exception ex)
         {
             LogService.Write("Could not save local state", ex);
-            SetStatus("Не удалось сохранить локальные данные: " + ex.Message);
+            SetStatus("Could not save local data: " + ex.Message);
         }
     }
 
