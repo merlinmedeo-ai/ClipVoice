@@ -84,16 +84,6 @@ Text is sent to the relevant external services when you use online translation o
 - `Assets/` — application icons
 - `tools/` — local SDK setup scripts
 
-## Contributing
-
-Before opening a pull request, run a Release build:
-
-```powershell
-dotnet build ClipVoice.csproj -c Release
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
 ## License
 
 No license has been selected yet. Until a `LICENSE` file is added, standard copyright remains with the project owner. Publicly visible source code does not, by itself, grant permission to copy, modify, or distribute it.
