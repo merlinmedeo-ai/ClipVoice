@@ -20,7 +20,12 @@ public sealed class ClipboardItem
     [JsonIgnore]
     public string TimeText => CreatedAt.ToString("HH:mm");
 
-    public string Fingerprint() => Kind == ClipboardItemKind.Text
-        ? "T:" + Text
-        : "F:" + string.Join("|", Files);
+    public bool HasSameContentAs(ClipboardItem other)
+    {
+        if (Kind != other.Kind) return false;
+
+        return Kind == ClipboardItemKind.Text
+            ? string.Equals(Text, other.Text, StringComparison.Ordinal)
+            : Files.SequenceEqual(other.Files, StringComparer.Ordinal);
+    }
 }

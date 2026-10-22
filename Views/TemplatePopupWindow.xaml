@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True"
         Background="Transparent" ShowInTaskbar="False" ShowActivated="False"
-        Topmost="True" SizeToContent="WidthAndHeight" Focusable="False">
+        Topmost="True" SizeToContent="WidthAndHeight" Focusable="False"
+        Opacity="0" IsHitTestVisible="False">
     <Window.Resources>
         <Style x:Key="PopupFolderButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
@@ -46,7 +47,9 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <ScrollViewer Grid.Row="0" MaxHeight="410" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer x:Name="ItemsScrollViewer" Grid.Row="0" MaxHeight="410"
+                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                          ScrollChanged="ItemsScrollViewer_ScrollChanged">
                 <StackPanel x:Name="ItemsHost"/>
             </ScrollViewer>
 
@@ -59,7 +62,7 @@
                 </Grid.RowDefinitions>
                 <Border Background="#282D39"/>
                 <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <Button Style="{StaticResource PopupFolderButton}" Click="SpeakSelection_Click"
                             ToolTip="Read selected text aloud" Padding="8,5" HorizontalContentAlignment="Center">
                         <TextBlock Text="♫" Foreground="#AAA3FF" FontSize="16" FontWeight="SemiBold"/>
@@ -67,6 +70,10 @@
                     <Button Grid.Column="1" Style="{StaticResource PopupFolderButton}" Click="TranslateSpeakSelection_Click"
                             ToolTip="Translate and speak selected text" Padding="8,5" HorizontalContentAlignment="Center">
                         <TextBlock Text="文♫" Foreground="#AAA3FF" FontSize="15" FontWeight="SemiBold"/>
+                    </Button>
+                    <Button Grid.Column="2" Style="{StaticResource PopupFolderButton}" Click="TranslateSelection_Click"
+                            ToolTip="Translate selected text" Padding="8,5" HorizontalContentAlignment="Center">
+                        <TextBlock Text="文" Foreground="#AAA3FF" FontSize="16" FontWeight="SemiBold"/>
                     </Button>
                 </Grid>
                 <Button Grid.Row="2" Style="{StaticResource PopupFolderButton}" Click="CreateFromSelection_Click" Padding="11,9">

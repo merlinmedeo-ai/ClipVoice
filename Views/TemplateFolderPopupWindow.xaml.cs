@@ -10,13 +10,15 @@ namespace ClipVoice.Views;
 
 public partial class TemplateFolderPopupWindow : Window
 {
-    private readonly TemplateFolder _folder;
+    private const int TemplateBatchSize = 20;
+    private readonly IReadOnlyList<TextTemplate> _templates;
     private readonly InputTarget _target;
     private readonly int _anchorRightX;
     private readonly int _anchorTopY;
     private readonly int _anchorLeftX;
     private readonly Func<TextTemplate, InputTarget, Task> _selectAsync;
     private bool _closing;
+    private int _nextTemplateIndex;
 
     public TemplateFolderPopupWindow(
         TemplateFolder folder,
@@ -28,7 +30,7 @@ public partial class TemplateFolderPopupWindow : Window
     {
         InitializeComponent();
         LocalizationService.Apply(this, ((App)Application.Current).Controller.Settings.Language);
-        _folder = folder;
+        _templates = folder.Templates;
         _target = target;
         _anchorRightX = anchorRightX;
         _anchorTopY = anchorTopY;
@@ -55,8 +57,25 @@ public partial class TemplateFolderPopupWindow : Window
     private void BuildItems()
     {
         ItemsHost.Children.Clear();
-        foreach (var template in _folder.Templates)
-            ItemsHost.Children.Add(CreateTemplateButton(template));
+        _nextTemplateIndex = 0;
+        AddNextTemplateBatch();
+    }
+
+    private void AddNextTemplateBatch()
+    {
+        var end = Math.Min(_nextTemplateIndex + TemplateBatchSize, _templates.Count);
+        while (_nextTemplateIndex < end)
+        {
+            ItemsHost.Children.Add(CreateTemplateButton(_templates[_nextTemplateIndex]));
+            _nextTemplateIndex++;
+        }
+    }
+
+    private void ItemsScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+        if (e.VerticalChange <= 0 || _nextTemplateIndex >= _templates.Count) return;
+        if (e.VerticalOffset + e.ViewportHeight >= e.ExtentHeight - 64)
+            AddNextTemplateBatch();
     }
 
     private Button CreateTemplateButton(TextTemplate template)
@@ -147,10 +166,45 @@ public partial class TemplateFolderPopupWindow : Window
 
     private static string CompactPreview(string? text)
     {
-        if (string.IsNullOrWhiteSpace(text)) return string.Empty;
-        var oneLine = string.Join(" ", text.Replace("\r", " ").Replace("\n", " ")
-            .Split(' ', StringSplitOptions.RemoveEmptyEntries));
-        return oneLine.Length <= 58 ? oneLine : oneLine[..58] + "…";
+        if (string.IsNullOrEmpty(text)) return string.Empty;
+
+        const int maxPreviewLength = 58;
+        const int maxSourceScanLength = 160;
+        var scanLength = Math.Min(text.Length, maxSourceScanLength);
+        var preview = new System.Text.StringBuilder(maxPreviewLength);
+        var pendingSpace = false;
+        var hasMoreContent = scanLength < text.Length;
+
+        for (var i = 0; i < scanLength; i++)
+        {
+            var character = text[i];
+            if (char.IsWhiteSpace(character))
+            {
+                pendingSpace = preview.Length > 0;
+                continue;
+            }
+
+            if (pendingSpace)
+            {
+                if (preview.Length == maxPreviewLength)
+                {
+                    hasMoreContent = true;
+                    break;
+                }
+                preview.Append(' ');
+                pendingSpace = false;
+            }
+
+            if (preview.Length == maxPreviewLength)
+            {
+                hasMoreContent = true;
+                break;
+            }
+            preview.Append(character);
+        }
+
+        var value = preview.ToString().TrimEnd();
+        return hasMoreContent ? value + "…" : value;
     }
 
     private void PlaceNextToFolder()
@@ -176,6 +230,8 @@ public partial class TemplateFolderPopupWindow : Window
 
         NativeMethods.SetWindowPos(hwnd, NativeMethods.HWND_TOPMOST, left, top, 0, 0,
             NativeMethods.SWP_NOSIZE | NativeMethods.SWP_NOACTIVATE | NativeMethods.SWP_SHOWWINDOW);
+        IsHitTestVisible = true;
+        Opacity = 1;
     }
 
     public void Dismiss()

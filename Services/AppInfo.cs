@@ -9,7 +9,7 @@ public static class AppInfo
         get
         {
             var version = Assembly.GetEntryAssembly()?.GetName().Version;
-            if (version is null) return "1.0.0";
+            if (version is null) return "1.0.1";
             var build = version.Build < 0 ? 0 : version.Build;
             return $"{version.Major}.{version.Minor}.{build}";
         }

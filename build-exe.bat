@@ -18,7 +18,7 @@ set "DOTNET_MULTILEVEL_LOOKUP=0"
 set "DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1"
 set "DOTNET_CLI_TELEMETRY_OPTOUT=1"
 set "DOTNET_NOLOGO=1"
-set "VERSION=1.0.0"
+set "VERSION=1.0.1"
 set "OUT=%~dp0dist\ClipVoice-%VERSION%-win-x64"
 
 echo Building ClipVoice %VERSION% for Windows x64...

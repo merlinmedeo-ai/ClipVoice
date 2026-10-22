@@ -15,6 +15,7 @@ public partial class MainWindow : Window
     private bool _suppressAutoHide;
     private bool _syncingActiveSelection;
     private TemplatePopupWindow? _templatePopup;
+    private TranslationPopupWindow? _translationPopup;
     private string _lastStatusText = "Ready";
 
     public MainWindow()
@@ -57,6 +58,9 @@ public partial class MainWindow : Window
 
     private void MainWindow_Deactivated(object? sender, EventArgs e)
     {
+        // Keep the panel alive while the translation result window is taking focus.
+        // It is hidden after that popup closes if focus stayed outside ClipVoice.
+        if (_translationPopup is { IsVisible: true }) return;
         if (!_suppressAutoHide && AppInstance.Controller.Settings.HidePanelWhenFocusLost)
             Hide();
     }
@@ -148,14 +152,17 @@ public partial class MainWindow : Window
 
         var popup = new TemplatePopupWindow(
             AppInstance.Controller.TemplateFolders,
+            AppInstance.Controller.History,
             target,
             x,
             y,
             (template, inputTarget) => AppInstance.Controller.InsertTemplateIntoWindowAsync(template, inputTarget),
+            (item, inputTarget) => AppInstance.Controller.PasteClipboardItemAsync(item, inputTarget),
             () => OpenSettings(3),
             CreateTemplateFromSelectionAsync,
             SpeakSelectionFromPopupAsync,
-            TranslateSpeakSelectionFromPopupAsync);
+            TranslateSpeakSelectionFromPopupAsync,
+            TranslateSelectionFromPopupAsync);
 
         popup.Closed += (_, _) =>
         {
@@ -250,6 +257,48 @@ public partial class MainWindow : Window
 
         if (string.IsNullOrWhiteSpace(selected)) return;
         await AppInstance.Controller.TranslateAndSpeakSelectedTextAsync(selected);
+    }
+
+    private async Task TranslateSelectionFromPopupAsync(InputTarget target)
+    {
+        var pointer = System.Windows.Forms.Cursor.Position;
+        using var operation = LogService.BeginOperation("translate", "context-menu");
+        LogService.Info($"Context menu action selected: action=translate; target={AppInstance.Controller.DescribeInputTarget(target)}");
+        string? selected;
+        try
+        {
+            selected = await AppInstance.Controller.CaptureSelectionOrClipboardAsync(target);
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = "Could not retrieve the selected text: " + ex.Message;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(selected)) return;
+        await AppInstance.Controller.TranslateSelectedTextAsync(selected, pointer.X, pointer.Y);
+    }
+
+    public void ShowTranslationPopup(string text, string languagePair, int screenX, int screenY)
+    {
+        void Show()
+        {
+            var previousPopup = _translationPopup;
+            var popup = new TranslationPopupWindow(text, languagePair, screenX, screenY);
+            popup.Closed += (_, _) =>
+            {
+                if (!ReferenceEquals(_translationPopup, popup)) return;
+                _translationPopup = null;
+                if (!IsActive && AppInstance.Controller.Settings.HidePanelWhenFocusLost)
+                    Hide();
+            };
+            _translationPopup = popup;
+            previousPopup?.Dismiss();
+            popup.Show();
+        }
+
+        if (Dispatcher.CheckAccess()) Show();
+        else Dispatcher.Invoke(Show);
     }
 
     private void Controller_GlobalMouseDown(int x, int y)

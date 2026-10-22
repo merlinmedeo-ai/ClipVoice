@@ -449,13 +449,14 @@ public sealed class AppController : IDisposable
     private void OnHotkey(string action)
     {
         var dispatchClock = Stopwatch.StartNew();
+        var pointer = System.Windows.Forms.Cursor.Position;
         Application.Current.Dispatcher.InvokeAsync(async () =>
         {
             LogService.Info($"Hotkey dispatched: action={action}; dispatcher_delay_ms={dispatchClock.ElapsedMilliseconds}");
             if (action == ActionPanel) TogglePanel();
             else if (action == ActionSpeak) await SpeakCurrentAsync(captureSelection: true, entryPoint: "global-hotkey");
-            else if (action == ActionTranslate) await TranslateCurrentAsync(false, captureSelection: true, entryPoint: "global-hotkey");
-            else if (action == ActionTranslateSpeak) await TranslateCurrentAsync(true, captureSelection: true, entryPoint: "global-hotkey");
+            else if (action == ActionTranslate) await TranslateCurrentAsync(false, captureSelection: true, entryPoint: "global-hotkey", popupScreenX: pointer.X, popupScreenY: pointer.Y);
+            else if (action == ActionTranslateSpeak) await TranslateCurrentAsync(true, captureSelection: true, entryPoint: "global-hotkey", popupScreenX: pointer.X, popupScreenY: pointer.Y);
             else if (action.StartsWith(TemplatePrefix, StringComparison.Ordinal)) await UseTemplateHotkeyAsync(action);
         });
     }
@@ -543,8 +544,7 @@ public sealed class AppController : IDisposable
                 return;
             }
 
-            var fingerprint = current.Fingerprint();
-            var existing = History.FirstOrDefault(x => x.Fingerprint() == fingerprint);
+            var existing = History.FirstOrDefault(x => x.HasSameContentAs(current));
             if (addToHistory)
             {
                 if (current.Kind == ClipboardItemKind.Text && current.Text.Length > MaxHistoryTextChars)
@@ -583,8 +583,7 @@ public sealed class AppController : IDisposable
 
     private void AddHistoryItem(ClipboardItem item)
     {
-        var fingerprint = item.Fingerprint();
-        var existing = History.FirstOrDefault(x => x.Fingerprint() == fingerprint);
+        var existing = History.FirstOrDefault(x => x.HasSameContentAs(item));
         if (existing is not null) History.Remove(existing);
         History.Insert(0, item);
         while (History.Count > Settings.HistoryLimit) History.RemoveAt(History.Count - 1);
@@ -606,19 +605,39 @@ public sealed class AppController : IDisposable
     {
         try
         {
-            if (item.Kind == ClipboardItemKind.Text) ClipboardService.SetText(item.Text);
-            else ClipboardService.SetFiles(item.Files);
-            MarkOwnClipboardWrite();
-            SetActiveHistory(item);
+            SetClipboardItem(item);
             SetStatus("The item is selected. Ctrl+V will paste it.");
         }
         catch (Exception ex) { SetStatus("Clipboard error: " + ex.Message); }
+    }
+
+    private void SetClipboardItem(ClipboardItem item)
+    {
+        if (item.Kind == ClipboardItemKind.Text) ClipboardService.SetText(item.Text);
+        else ClipboardService.SetFiles(item.Files);
+        MarkOwnClipboardWrite();
+        SetActiveHistory(item);
     }
 
     public async Task PasteClipboardItemAsync(ClipboardItem item)
     {
         ActivateClipboardItem(item);
         await PasteToLastTargetAsync();
+    }
+
+    public async Task PasteClipboardItemAsync(ClipboardItem item, InputTarget target)
+    {
+        try
+        {
+            SetClipboardItem(item);
+            if (Settings.HidePanelAfterPaste) _main?.Hide();
+            var ok = await _system.SendPasteShortcutAsync(target);
+            SetStatus(ok ? "Pasted" : "The item is on the clipboard. If the target app is running as administrator, press Ctrl+V manually.");
+        }
+        catch (Exception ex)
+        {
+            SetStatus("Clipboard error: " + ex.Message);
+        }
     }
 
     public async Task PasteTemplateAsync(TextTemplate template)
@@ -1475,14 +1494,26 @@ public sealed class AppController : IDisposable
         }
     }
 
-    public async Task TranslateCurrentAsync(bool speakAfter, bool captureSelection = false, string entryPoint = "direct")
+    public Task TranslateSelectedTextAsync(string text, int screenX, int screenY) =>
+        TranslateCurrentAsync(false, entryPoint: "context-menu", selectedText: text, popupScreenX: screenX, popupScreenY: screenY);
+
+    public async Task TranslateCurrentAsync(
+        bool speakAfter,
+        bool captureSelection = false,
+        string entryPoint = "direct",
+        string? selectedText = null,
+        int? popupScreenX = null,
+        int? popupScreenY = null)
     {
         using var operation = LogService.BeginOperation(speakAfter ? "translate-speak" : "translate", entryPoint);
+        var pointer = System.Windows.Forms.Cursor.Position;
+        var resultScreenX = popupScreenX ?? pointer.X;
+        var resultScreenY = popupScreenY ?? pointer.Y;
         CancelWork();
         _workCts = new CancellationTokenSource();
         try
         {
-            var text = await GetActionTextAsync(captureSelection, _workCts.Token);
+            var text = selectedText ?? await GetActionTextAsync(captureSelection, _workCts.Token);
             if (string.IsNullOrWhiteSpace(text))
             {
                 SetStatus(captureSelection && Settings.AutoCaptureSelection
@@ -1516,6 +1547,8 @@ public sealed class AppController : IDisposable
             ClipboardService.SetText(translated);
             MarkOwnClipboardWrite();
             AddTextToHistory(translated);
+            if (!speakAfter)
+                _main?.ShowTranslationPopup(translated, $"{sourceName} → {targetName}", resultScreenX, resultScreenY);
 
             if (speakAfter)
             {

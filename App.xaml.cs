@@ -93,7 +93,7 @@ public partial class App : Application
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add("Exit", null, (_, _) => Dispatcher.Invoke(ExitApplication));
 
-        _trayIcon = LoadAppIcon();
+        _trayIcon = LoadTrayIcon();
         _tray = new Forms.NotifyIcon
         {
             Text = "ClipVoice",
@@ -105,11 +105,11 @@ public partial class App : Application
     }
 
 
-    private static Icon LoadAppIcon()
+    private static Icon LoadTrayIcon()
     {
         try
         {
-            var resource = Application.GetResourceStream(new Uri("pack://application:,,,/Assets/ClipVoice.ico", UriKind.Absolute));
+            var resource = Application.GetResourceStream(new Uri("pack://application:,,,/Assets/TrayIcon.ico", UriKind.Absolute));
             if (resource?.Stream is not null)
             {
                 using (resource.Stream)

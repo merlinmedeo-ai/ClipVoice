@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True"
         Background="Transparent" ShowInTaskbar="False" ShowActivated="False"
-        Topmost="True" SizeToContent="WidthAndHeight" Focusable="False">
+        Topmost="True" SizeToContent="WidthAndHeight" Focusable="False"
+        Opacity="0" IsHitTestVisible="False">
     <Window.Resources>
         <Style x:Key="TemplateItemButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
@@ -41,7 +42,9 @@
             <DropShadowEffect BlurRadius="22" ShadowDepth="6" Opacity="0.45" Color="#000000"/>
         </Border.Effect>
         <Grid>
-            <ScrollViewer MaxHeight="440" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer x:Name="ItemsScrollViewer" MaxHeight="440"
+                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                          ScrollChanged="ItemsScrollViewer_ScrollChanged">
                 <StackPanel x:Name="ItemsHost"/>
             </ScrollViewer>
         </Grid>

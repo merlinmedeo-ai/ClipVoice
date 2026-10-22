@@ -4,6 +4,17 @@
 
 ClipVoice is a Windows app for clipboard history, reusable text templates, translation, and text-to-speech.
 
+## Download
+
+Download the standalone Windows x64 app from [GitHub Releases](https://github.com/merlinmedeo-ai/ClipVoice/releases/latest). No separate .NET installation is required.
+
+### What's new in 1.0.1
+
+- Updated application icon and a dedicated system tray icon
+- Translation results in a popup near the pointer
+- Clipboard history available from the template popup menu
+- Improved template popup behavior and clipboard duplicate detection
+
 ## Features
 
 - Recent clipboard history
@@ -44,7 +55,7 @@ Run:
 .\build-exe.bat
 ```
 
-The executable is created at `dist\ClipVoice-1.0.0-win-x64\ClipVoice.exe`. The `dist` directory is excluded from Git; publish binary builds through GitHub Releases.
+The executable is created at `dist\ClipVoice-1.0.1-win-x64\ClipVoice.exe`. The `dist` directory is excluded from Git; publish binary builds through GitHub Releases.
 
 Equivalent command:
 
