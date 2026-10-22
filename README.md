@@ -1,6 +1,6 @@
 # ClipVoice
 
-![ClipVoice](Assets/ClipVoice.png)
+<img src="Assets/ClipVoice-logo.png" alt="ClipVoice" width="220" />
 
 ClipVoice is a Windows app for clipboard history, reusable text templates, translation, and text-to-speech.
 
