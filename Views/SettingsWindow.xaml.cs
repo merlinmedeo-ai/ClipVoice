@@ -31,6 +31,9 @@ public partial class SettingsWindow : Window
         SettingsTitleText.Text = $"ClipVoice Settings {AppInfo.DisplayVersion}";
         SourceInitialized += (_, _) => FitToMonitorWorkArea();
         var s = AppInstance.Controller.Settings;
+        GroqKeyBox.Password = GroqDictationService.DecodeKey(s.GroqKeyProtected);
+        DictationHotkey.Text = s.HotkeyDictation;
+        SelectComboByTag(DictationLanguageCombo, s.DictationLanguage);
         SelectComboByTag(InterfaceLanguageCombo, LocalizationService.NormalizeLanguage(s.Language));
         PanelHotkey.Text = s.HotkeyPanel;
         SpeakHotkey.Text = s.HotkeySpeak;
@@ -105,6 +108,9 @@ public partial class SettingsWindow : Window
 
     private AppSettings BuildSettings() => new()
     {
+        GroqKeyProtected = GroqDictationService.EncodeKey(GroqKeyBox.Password.Trim()),
+        DictationLanguage = ComboTagValue(DictationLanguageCombo, "ru"),
+        HotkeyDictation = DictationHotkey.Text.Trim(),
         Language = ComboTagValue(InterfaceLanguageCombo, "en"),
         HotkeyPanel = PanelHotkey.Text.Trim(),
         HotkeySpeak = SpeakHotkey.Text.Trim(),
@@ -330,11 +336,26 @@ public partial class SettingsWindow : Window
 
     private void ResetHotkeys_Click(object sender, RoutedEventArgs e)
     {
+        DictationHotkey.Text = "CapsLock";
         PanelHotkey.Text = "Ctrl+Alt+Space";
         SpeakHotkey.Text = "Ctrl+Alt+S";
         TranslateHotkey.Text = "Ctrl+Alt+T";
         TranslateSpeakHotkey.Text = "Ctrl+Alt+Y";
         ValidateHotkeysLive();
+    }
+
+    private void GroqHelp_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Window { Owner = this, Title = "★ Как получить ключ Groq", Width = 580, Height = 440, WindowStartupLocation = WindowStartupLocation.CenterOwner, Background = Background, Foreground = Foreground };
+        var panel = new StackPanel { Margin = new Thickness(22) };
+        panel.Children.Add(new TextBlock { TextWrapping = TextWrapping.Wrap, Text = "1. Откройте console.groq.com и зарегистрируйтесь или войдите.\n\n2. Откройте API Keys → Create API Key, задайте имя ClipVoice и скопируйте созданный ключ.\n\n3. Вставьте ключ в поле ClipVoice и нажмите «Сохранить». Каждый пользователь вводит свой ключ; не передавайте его другим.\n\n4. Выберите язык. В нужном текстовом поле нажмите Ctrl+Alt+D, произнесите реплику и нажмите снова.\n\nОставайтесь на Free Plan для бесплатного использования. Лимиты зависят от организации; дополнительные ключи одной организации их не увеличивают. В Data Controls можно включить Zero Data Retention. Точность и пунктуация не гарантированы." });
+        if (panel.Children[0] is TextBlock instructions)
+            instructions.Text = instructions.Text.Replace("Ctrl+Alt+D", string.IsNullOrWhiteSpace(DictationHotkey.Text) ? "назначенную горячую клавишу" : DictationHotkey.Text);
+        var link = new Button { Content = "Открыть страницу API Keys", Margin = new Thickness(0,16,0,0) };
+        link.Click += (_, _) => { try { Process.Start(new ProcessStartInfo("https://console.groq.com/keys") { UseShellExecute = true }); } catch { MessageBox.Show(dialog, "Откройте https://console.groq.com/keys в браузере."); } };
+        panel.Children.Add(link);
+        dialog.Content = new ScrollViewer { Content = panel, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+        dialog.ShowDialog();
     }
 
     private void ValidateHotkeysLive()

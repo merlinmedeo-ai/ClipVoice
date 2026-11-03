@@ -8,6 +8,14 @@ ClipVoice is a Windows app for clipboard history, reusable text templates, trans
 
 Download the standalone Windows x64 app from [GitHub Releases](https://github.com/merlinmedeo-ai/ClipVoice/releases/latest). No separate .NET installation is required.
 
+### What's new in 1.1.0
+
+- Online dictation with Groq Whisper large-v3 and automatic punctuation
+- Personal API key encrypted with Windows DPAPI; setup instructions under ★
+- Caps Lock to start / finish dictation, or a custom shortcut
+- Automatic insertion into the original field, with the result retained on the clipboard
+- Soft recording chime and a compact microphone level indicator
+
 ### What's new in 1.0.1
 
 - Updated application icon and a dedicated system tray icon
@@ -55,7 +63,7 @@ Run:
 .\build-exe.bat
 ```
 
-The executable is created at `dist\ClipVoice-1.0.1-win-x64\ClipVoice.exe`. The `dist` directory is excluded from Git; publish binary builds through GitHub Releases.
+The executable is created at `dist\ClipVoice-1.1.0-win-x64\ClipVoice.exe`. The `dist` directory is excluded from Git; publish binary builds through GitHub Releases.
 
 Equivalent command:
 
@@ -87,3 +95,26 @@ Text is sent to the relevant external services when you use online translation o
 ## License
 
 No license has been selected yet. Until a `LICENSE` file is added, standard copyright remains with the project owner. Publicly visible source code does not, by itself, grant permission to copy, modify, or distribute it.
+# Диктовка через Groq
+
+В настройках на вкладке **SPEECH & TRANSLATION** введите личный API-ключ Groq,
+выберите язык и сохраните настройки. Кнопка **★** открывает инструкцию по получению
+ключа на https://console.groq.com/keys. Ключ зашифрован Windows DPAPI и доступен
+только текущему пользователю Windows; при переносе настроек его нужно ввести заново.
+
+Установите курсор в текстовое поле и нажмите **Caps Lock**. После звукового сигнала
+произнесите фразу и нажмите сочетание повторно. Через 60 секунд запись заканчивается
+автоматически. Приложение отправляет WAV в Groq Whisper large-v3, вставляет результат
+с пунктуацией в исходное поле и оставляет его в буфере и истории. Если вставка
+недоступна, используйте Ctrl+V. Не меняйте поле назначения до завершения операции.
+
+В настройках диктовки можно назначить Caps Lock или собственную комбинацию:
+нажмите поле горячей клавиши, затем нужное сочетание и сохраните настройки.
+Ранее сохранённое сочетание сохраняется; для перехода на Caps Lock назначьте его в этом поле.
+
+Нужны интернет, микрофон по умолчанию и разрешение Windows на использование микрофона
+классическими приложениями. Временный WAV удаляется после запроса. Бесплатный тариф
+Groq имеет ограничения; дополнительные ключи одной организации не увеличивают квоту.
+Управление хранением данных: https://console.groq.com/settings/data-controls.
+Точность слов и пунктуации зависит от записи. При ошибке отправка автоматически
+не повторяется. Полная проверка требует действующего ключа и записи с микрофона.

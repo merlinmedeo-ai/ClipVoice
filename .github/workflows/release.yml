@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Verify version and build portable app
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          [xml]$project = Get-Content ClipVoice.csproj
+          if ($project.Project.PropertyGroup.Version -ne $version) { throw 'Tag and project version differ' }
+          dotnet publish ClipVoice.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=None -p:DebugSymbols=false -o artifacts/app
+          if ($LASTEXITCODE -ne 0) { throw 'Publish failed' }
+          Compress-Archive -LiteralPath artifacts/app/ClipVoice.exe -DestinationPath "artifacts/ClipVoice-$version-win-x64.zip"
+      - name: Publish GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = '${{ github.ref_name }}'
+          $version = $tag.TrimStart('v')
+          gh release create $tag "artifacts/ClipVoice-$version-win-x64.zip" --verify-tag --title "ClipVoice $version" --notes-file RELEASE_NOTES.md
+          if ($LASTEXITCODE -ne 0) { throw 'Release publication failed' }

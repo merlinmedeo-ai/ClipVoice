@@ -45,7 +45,7 @@ public static class HotkeyParser
             error = "A primary key is required";
             return false;
         }
-        if (modifiers == 0)
+        if (modifiers == 0 && key != Key.Capital)
         {
             error = "Add Ctrl, Alt, Shift, or Win to avoid capturing a regular key system-wide";
             return false;
@@ -70,7 +70,7 @@ public static class HotkeyParser
         if (modifiers.HasFlag(ModifierKeys.Alt)) nativeModifiers |= NativeMethods.MOD_ALT;
         if (modifiers.HasFlag(ModifierKeys.Shift)) nativeModifiers |= NativeMethods.MOD_SHIFT;
         if (modifiers.HasFlag(ModifierKeys.Windows)) nativeModifiers |= NativeMethods.MOD_WIN;
-        if (nativeModifiers == 0) return string.Empty;
+        if (nativeModifiers == 0 && key != Key.Capital) return string.Empty;
         return Format(nativeModifiers, key);
     }
 
@@ -79,6 +79,7 @@ public static class HotkeyParser
     private static bool TryParseKey(string value, out Key key)
     {
         key = Key.None;
+        if (value.Equals("CapsLock", StringComparison.OrdinalIgnoreCase) || value.Equals("Caps Lock", StringComparison.OrdinalIgnoreCase)) { key = Key.Capital; return true; }
         if (value.Length == 1 && char.IsLetter(value[0])) return Enum.TryParse(value.ToUpperInvariant(), out key);
         if (value.Length == 1 && char.IsDigit(value[0]))
         {
@@ -101,6 +102,7 @@ public static class HotkeyParser
 
     private static string FormatKey(Key key)
     {
+        if (key == Key.Capital) return "CapsLock";
         if (key >= Key.D0 && key <= Key.D9) return ((int)key - (int)Key.D0).ToString();
         return key.ToString();
     }

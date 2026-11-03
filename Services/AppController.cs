@@ -12,7 +12,7 @@ using ClipVoice.Views;
 
 namespace ClipVoice.Services;
 
-public sealed class AppController : IDisposable
+public sealed partial class AppController : IDisposable
 {
     public const string ActionPanel = "panel";
     public const string ActionSpeak = "speak";
@@ -399,6 +399,7 @@ public sealed class AppController : IDisposable
     {
         var map = new Dictionary<string, string>
         {
+            ["dictation"] = settings.HotkeyDictation,
             [ActionPanel] = settings.HotkeyPanel,
             [ActionSpeak] = settings.HotkeySpeak,
             [ActionTranslate] = settings.HotkeyTranslate,
@@ -434,6 +435,7 @@ public sealed class AppController : IDisposable
 
     private string DescribeAction(string action, IEnumerable<TemplateFolder>? folders = null)
     {
+        if (action == "dictation") return "Диктовка";
         if (action == ActionPanel) return "Open panel";
         if (action == ActionSpeak) return "Read aloud";
         if (action == ActionTranslate) return "Translate";
@@ -453,7 +455,8 @@ public sealed class AppController : IDisposable
         Application.Current.Dispatcher.InvokeAsync(async () =>
         {
             LogService.Info($"Hotkey dispatched: action={action}; dispatcher_delay_ms={dispatchClock.ElapsedMilliseconds}");
-            if (action == ActionPanel) TogglePanel();
+            if (action == "dictation") await ToggleDictationAsync();
+            else if (action == ActionPanel) TogglePanel();
             else if (action == ActionSpeak) await SpeakCurrentAsync(captureSelection: true, entryPoint: "global-hotkey");
             else if (action == ActionTranslate) await TranslateCurrentAsync(false, captureSelection: true, entryPoint: "global-hotkey", popupScreenX: pointer.X, popupScreenY: pointer.Y);
             else if (action == ActionTranslateSpeak) await TranslateCurrentAsync(true, captureSelection: true, entryPoint: "global-hotkey", popupScreenX: pointer.X, popupScreenY: pointer.Y);
@@ -1771,6 +1774,10 @@ public sealed class AppController : IDisposable
 
     public void Dispose()
     {
+        _dictationTimer?.Stop();
+        HideDictationOverlay();
+        _dictationCts.Cancel();
+        _dictation.Dispose();
         SetGlobalMouseTracking(false);
         CancelWork();
         try { _backgroundCts?.Cancel(); } catch { }

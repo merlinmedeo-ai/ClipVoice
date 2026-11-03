@@ -37,7 +37,7 @@
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
         <StackPanel Margin="4,0,0,15">
             <TextBlock x:Name="SettingsTitleText" Text="ClipVoice Settings" FontSize="24" FontWeight="SemiBold"/>
-            <TextBlock Text="Configure the main features here. No API keys or account registration required." Style="{StaticResource Hint}" Margin="0,3,0,0"/>
+            <TextBlock Text="Настройте функции ClipVoice. Для диктовки нужен личный ключ Groq." Style="{StaticResource Hint}" Margin="0,3,0,0"/>
         </StackPanel>
 
         <TabControl x:Name="SettingsTabs" Grid.Row="1">
@@ -120,6 +120,21 @@
             <TabItem Header="SPEECH &amp; TRANSLATION">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
                     <StackPanel>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <DockPanel><Button DockPanel.Dock="Right" Content="★" ToolTip="Как получить ключ Groq" Click="GroqHelp_Click"/><TextBlock Text="Речь в текст — Groq Whisper large-v3" Style="{StaticResource SectionTitle}"/></DockPanel>
+                                <TextBlock Text="Личный API-ключ (хранится зашифрованным для вашего пользователя Windows)" Style="{StaticResource Hint}"/>
+                                <PasswordBox x:Name="GroqKeyBox" Margin="0,8" Padding="8"/>
+                                <TextBlock Text="Язык диктовки"/>
+                                <ComboBox x:Name="DictationLanguageCombo" Margin="0,6">
+                                    <ComboBoxItem Content="Русский" Tag="ru"/><ComboBoxItem Content="Українська" Tag="uk"/><ComboBoxItem Content="English" Tag="en"/><ComboBoxItem Content="Автоматически" Tag="auto"/>
+                                </ComboBox>
+                                <TextBlock Text="Горячая клавиша: начать / закончить запись"/>
+                                <TextBox x:Name="DictationHotkey" IsReadOnly="True" PreviewKeyDown="HotkeyBox_PreviewKeyDown" Margin="0,6"/>
+                                <TextBlock Text="По умолчанию — Caps Lock. Нажмите это поле и затем Caps Lock или своё сочетание, например Ctrl+Alt+D. Первое нажатие начинает запись, второе отправляет её. После изменения нажмите «Сохранить»." Style="{StaticResource Hint}"/>
+                                <TextBlock Text="Сохраните настройки, установите курсор в нужное поле и нажмите сочетание. Повторное нажатие отправит фразу в Groq: текст с пунктуацией вставится в поле и останется в буфере. Максимум 60 секунд на реплику. Нужен интернет; запись передаётся Groq. Бесплатный тариф имеет лимиты." Style="{StaticResource Hint}"/>
+                            </StackPanel>
+                        </Border>
                         <Border Style="{StaticResource Card}">
                             <StackPanel>
                                 <Grid Margin="0,0,0,10">

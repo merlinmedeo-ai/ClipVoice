@@ -2,6 +2,9 @@ namespace ClipVoice.Models;
 
 public sealed class AppSettings
 {
+    public string GroqKeyProtected { get; set; } = "";
+    public string DictationLanguage { get; set; } = "ru";
+    public string HotkeyDictation { get; set; } = "CapsLock";
     public string Language { get; set; } = "en";
     public string HotkeyPanel { get; set; } = "Ctrl+Alt+Space";
     public string HotkeySpeak { get; set; } = "Ctrl+Alt+S";
