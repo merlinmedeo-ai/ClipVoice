@@ -1,16 +1,16 @@
 # ClipVoice
 
-<img src="Assets/ClipVoice.png" alt="ClipVoice — диктовка, буфер обмена, перевод и озвучивание" width="220" />
+<img src="Assets/ClipVoice.png" alt="ClipVoice — dictation, clipboard, translation and text-to-speech" width="220" />
 
 ClipVoice is a Windows app for voice dictation, clipboard history, reusable text templates, translation, and text-to-speech.
 
-Говорите — ClipVoice распознаёт фразу через Groq Whisper large-v3, вставляет текст с пунктуацией в выбранное поле и оставляет его в буфере. Нажмите **Caps Lock** для начала и повторно для отправки. Сочетание можно изменить в настройках.
+Speak a phrase and ClipVoice transcribes it with Groq Whisper large-v3, inserts the punctuated text into the selected field, and keeps it on the clipboard. Press **Caps Lock** to start recording and again to submit. You can change the shortcut in settings.
 
 ## Download
 
 Download the standalone Windows x64 app from [GitHub Releases](https://github.com/merlinmedeo-ai/ClipVoice/releases/latest). No separate .NET installation is required.
 
-**Актуальная версия: 1.1.1.** [Скачать для Windows x64](https://github.com/merlinmedeo-ai/ClipVoice/releases/download/v1.1.1/ClipVoice-1.1.1-win-x64.zip). Распакуйте архив и запустите `ClipVoice.exe`, предварительно закрыв старую версию. Настройки и история сохраняются.
+**Current version: 1.1.1.** [Download for Windows x64](https://github.com/merlinmedeo-ai/ClipVoice/releases/download/v1.1.1/ClipVoice-1.1.1-win-x64.zip). Extract the archive and run `ClipVoice.exe` after closing the previous version. Your settings and history are preserved.
 
 ### What's new in 1.1.1
 
@@ -112,26 +112,29 @@ Dictation uses the official Groq API. Microphone audio is sent to Groq only when
 ## License
 
 No license has been selected yet. Until a `LICENSE` file is added, standard copyright remains with the project owner. Publicly visible source code does not, by itself, grant permission to copy, modify, or distribute it.
-## Диктовка через Groq
 
-В настройках на вкладке **SPEECH & TRANSLATION** введите личный API-ключ Groq,
-выберите язык и сохраните настройки. Кнопка **★** открывает инструкцию по получению
-ключа на https://console.groq.com/keys. Ключ зашифрован Windows DPAPI и доступен
-только текущему пользователю Windows; при переносе настроек его нужно ввести заново.
+## Dictation with Groq
 
-Установите курсор в текстовое поле и нажмите **Caps Lock**. После звукового сигнала
-произнесите фразу и нажмите сочетание повторно. Через 60 секунд запись заканчивается
-автоматически. Приложение отправляет WAV в Groq Whisper large-v3, вставляет результат
-с пунктуацией в исходное поле и оставляет его в буфере и истории. Если вставка
-недоступна, используйте Ctrl+V. Не меняйте поле назначения до завершения операции.
+In settings, open **SPEECH & TRANSLATION**, enter your personal Groq API key,
+select a language, and save. Click **★** for instructions on obtaining a key
+from [Groq API Keys](https://console.groq.com/keys). The key is encrypted with
+Windows DPAPI and is accessible only to the current Windows user. Enter it again
+if you move your settings to another computer or Windows account.
 
-В настройках диктовки можно назначить Caps Lock или собственную комбинацию:
-нажмите поле горячей клавиши, затем нужное сочетание и сохраните настройки.
-Ранее сохранённое сочетание сохраняется; для перехода на Caps Lock назначьте его в этом поле.
+Place the cursor in a text field and press **Caps Lock**. After the chime, speak
+your phrase and press the shortcut again. Recording stops automatically after
+60 seconds. ClipVoice sends the WAV recording to Groq Whisper large-v3, inserts
+the punctuated result into the original field, and keeps it on the clipboard
+and in history. If automatic insertion is unavailable, press **Ctrl+V**.
+Keep the destination field unchanged until the operation finishes.
 
-Нужны интернет, микрофон по умолчанию и разрешение Windows на использование микрофона
-классическими приложениями. Временный WAV удаляется после запроса. Бесплатный тариф
-Groq имеет ограничения; дополнительные ключи одной организации не увеличивают квоту.
-Управление хранением данных: https://console.groq.com/settings/data-controls.
-Точность слов и пунктуации зависит от записи. При ошибке отправка автоматически
-не повторяется. Полная проверка требует действующего ключа и записи с микрофона.
+To assign Caps Lock or a custom combination, click the dictation shortcut field,
+press your preferred shortcut, and save. Existing shortcuts are preserved when
+updating; assign Caps Lock in this field if you want to switch to it.
+
+Dictation requires internet access, a default microphone, and Windows microphone
+permission for desktop apps. The temporary WAV is deleted after the request.
+Groq's free plan has limits; additional keys within the same organization do not
+increase its quota. Manage retention in [Groq Data Controls](https://console.groq.com/settings/data-controls).
+Word and punctuation accuracy depend on recording quality. Failed requests are
+not retried automatically. End-to-end verification requires a valid key and a microphone recording.
