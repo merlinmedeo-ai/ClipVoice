@@ -1,12 +1,22 @@
 # ClipVoice
 
-<img src="Assets/ClipVoice-logo.png" alt="ClipVoice" width="220" />
+<img src="Assets/ClipVoice.png" alt="ClipVoice — диктовка, буфер обмена, перевод и озвучивание" width="220" />
 
-ClipVoice is a Windows app for clipboard history, reusable text templates, translation, and text-to-speech.
+ClipVoice is a Windows app for voice dictation, clipboard history, reusable text templates, translation, and text-to-speech.
+
+Говорите — ClipVoice распознаёт фразу через Groq Whisper large-v3, вставляет текст с пунктуацией в выбранное поле и оставляет его в буфере. Нажмите **Caps Lock** для начала и повторно для отправки. Сочетание можно изменить в настройках.
 
 ## Download
 
 Download the standalone Windows x64 app from [GitHub Releases](https://github.com/merlinmedeo-ai/ClipVoice/releases/latest). No separate .NET installation is required.
+
+**Актуальная версия: 1.1.1.** [Скачать для Windows x64](https://github.com/merlinmedeo-ai/ClipVoice/releases/download/v1.1.1/ClipVoice-1.1.1-win-x64.zip). Распакуйте архив и запустите `ClipVoice.exe`, предварительно закрыв старую версию. Настройки и история сохраняются.
+
+### What's new in 1.1.1
+
+- Project page and release now use the current application icon
+- Updated feature descriptions, setup instructions, and privacy information
+- Application manifest version synchronized with the release
 
 ### What's new in 1.1.0
 
@@ -25,6 +35,10 @@ Download the standalone Windows x64 app from [GitHub Releases](https://github.co
 
 ## Features
 
+- Groq Whisper large-v3 dictation with punctuation and a personal API key
+- Caps Lock or a configurable shortcut to start / finish recording
+- Soft start chime and a compact panel with stationary bars reacting to microphone volume
+- Dictation result inserted into the original field and retained in clipboard history
 - Recent clipboard history
 - Reusable text templates and global hotkeys
 - Template menu with `Alt + Right-click`
@@ -38,7 +52,8 @@ Download the standalone Windows x64 app from [GitHub Releases](https://github.co
 
 - Windows 10 or Windows 11, x64
 - .NET SDK 8 for development
-- Internet access for online translation, online speech, and the initial Piper download
+- Internet access for dictation, online translation, online speech, and the initial Piper download
+- Personal Groq API key and microphone access for dictation (instructions under ★ in settings)
 
 The self-contained release includes the .NET runtime and does not require a separate .NET installation.
 
@@ -63,7 +78,7 @@ Run:
 .\build-exe.bat
 ```
 
-The executable is created at `dist\ClipVoice-1.1.0-win-x64\ClipVoice.exe`. The `dist` directory is excluded from Git; publish binary builds through GitHub Releases.
+The executable is created at `dist\ClipVoice-1.1.1-win-x64\ClipVoice.exe`. The `dist` directory is excluded from Git; publish binary builds through GitHub Releases.
 
 Equivalent command:
 
@@ -83,6 +98,8 @@ Settings, clipboard history, templates, logs, and the audio cache are stored in 
 
 Text is sent to the relevant external services when you use online translation or speech. Piper works offline after its runtime and voice models have been downloaded. The app uses unofficial consumer interfaces for online services, so they may change without notice.
 
+Dictation uses the official Groq API. Microphone audio is sent to Groq only when dictation is used; the temporary local WAV is deleted after the request. The personal API key is encrypted with Windows DPAPI in settings. Groq's free plan has usage limits. Review [Groq data controls](https://console.groq.com/docs/your-data) and [current limits](https://console.groq.com/docs/rate-limits).
+
 ## Project structure
 
 - `Views/` — WPF windows and layouts
@@ -95,7 +112,7 @@ Text is sent to the relevant external services when you use online translation o
 ## License
 
 No license has been selected yet. Until a `LICENSE` file is added, standard copyright remains with the project owner. Publicly visible source code does not, by itself, grant permission to copy, modify, or distribute it.
-# Диктовка через Groq
+## Диктовка через Groq
 
 В настройках на вкладке **SPEECH & TRANSLATION** введите личный API-ключ Groq,
 выберите язык и сохраните настройки. Кнопка **★** открывает инструкцию по получению

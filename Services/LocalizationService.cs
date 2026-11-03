@@ -24,7 +24,6 @@ public static class LocalizationService
         ["GENERAL"] = ("ОСНОВНОЕ", "ЗАГАЛЬНЕ"), ["HOTKEYS"] = ("ГОРЯЧИЕ КЛАВИШИ", "ГАРЯЧІ КЛАВІШІ"),
         ["SPEECH & TRANSLATION"] = ("ОЗВУЧИВАНИЕ И ПЕРЕВОД", "ОЗВУЧЕННЯ ТА ПЕРЕКЛАД"), ["TEMPLATES"] = ("ШАБЛОНЫ", "ШАБЛОНИ"),
         ["ClipVoice Settings"] = ("Настройки ClipVoice", "Налаштування ClipVoice"),
-        ["Configure the main features here. No API keys or account registration required."] = ("Настройте основные функции приложения. API-ключи и регистрация не требуются.", "Налаштуйте основні функції програми. API-ключі та реєстрація не потрібні."),
         ["Read selected text aloud"] = ("Озвучивание выделенного текста", "Озвучення виділеного тексту"),
         ["Translate selected text"] = ("Перевести выделенный текст", "Перекласти виділений текст"),
         ["Translation"] = ("Перевод", "Переклад"),
